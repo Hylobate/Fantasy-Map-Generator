@@ -226,7 +226,6 @@ declareDefaultFonts(); // execute once on load
 
 function declareFont(font) {
   const {family, src, ...rest} = font;
-  addFontOption(family);
 
   if (!src) return;
   const fontFace = new FontFace(family, src, {...rest, display: "block"});
@@ -255,15 +254,6 @@ function getUsedFonts(svg) {
 
   const usedFonts = fonts.filter(font => usedFontFamilies.has(font.family));
   return usedFonts;
-}
-
-function addFontOption(family) {
-  const options = document.getElementById("styleSelectFont");
-  const option = document.createElement("option");
-  option.value = family;
-  option.innerText = family;
-  option.style.fontFamily = family;
-  options.add(option);
 }
 
 async function fetchGoogleFont(family) {
@@ -312,53 +302,4 @@ async function loadFontsAsDataURI(fonts) {
   });
 
   return await Promise.all(promises);
-}
-
-async function addGoogleFont(family) {
-  const fontRanges = await fetchGoogleFont(family);
-  if (!fontRanges) return tip("Cannot fetch Google font for this value", true, "error", 4000);
-  tip(`Google font ${family} is loading...`, true, "warn", 4000);
-
-  const promises = fontRanges.map(range => {
-    const {src, unicodeRange, variant} = range;
-    const fontFace = new FontFace(family, src, {unicodeRange, variant, display: "block"});
-    return fontFace.load();
-  });
-
-  Promise.all(promises)
-    .then(fontFaces => {
-      fontFaces.forEach(fontFace => document.fonts.add(fontFace));
-      fonts.push(...fontRanges);
-      tip(`Google font ${family} is added to the list`, true, "success", 4000);
-      addFontOption(family);
-      document.getElementById("styleSelectFont").value = family;
-      changeFont();
-    })
-    .catch(err => {
-      tip(`Failed to load Google font ${family}`, true, "error", 4000);
-      ERROR && console.error(err);
-    });
-}
-
-function addLocalFont(family) {
-  fonts.push({family});
-
-  const fontFace = new FontFace(family, `local(${family})`, {display: "block"});
-  document.fonts.add(fontFace);
-  tip(`Local font ${family} is added to the fonts list`, true, "success", 4000);
-  addFontOption(family);
-  document.getElementById("styleSelectFont").value = family;
-  changeFont();
-}
-
-function addWebFont(family, url) {
-  const src = `url('${url}')`;
-  fonts.push({family, src});
-
-  const fontFace = new FontFace(family, src, {display: "block"});
-  document.fonts.add(fontFace);
-  tip(`Font ${family} is added to the list`, true, "success", 4000);
-  addFontOption(family);
-  document.getElementById("styleSelectFont").value = family;
-  changeFont();
 }

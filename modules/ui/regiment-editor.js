@@ -26,8 +26,6 @@ function editRegiment(selector) {
   document.getElementById("regimentNameRestore").addEventListener("click", restoreName);
   document.getElementById("regimentType").addEventListener("click", changeType);
   document.getElementById("regimentName").addEventListener("change", changeName);
-  document.getElementById("regimentEmblem").addEventListener("input", changeEmblem);
-  document.getElementById("regimentEmblemSelect").addEventListener("click", selectEmblem);
   document.getElementById("regimentAttack").addEventListener("click", toggleAttack);
   document.getElementById("regimentRegenerateLegend").addEventListener("click", regenerateLegend);
   document.getElementById("regimentLegend").addEventListener("click", editLegend);
@@ -44,7 +42,6 @@ function editRegiment(selector) {
   function updateRegimentData(regiment) {
     document.getElementById("regimentType").className = regiment.n ? "icon-anchor" : "icon-users";
     document.getElementById("regimentName").value = regiment.name;
-    document.getElementById("regimentEmblem").value = regiment.icon;
     const composition = document.getElementById("regimentComposition");
 
     composition.innerHTML = options.military

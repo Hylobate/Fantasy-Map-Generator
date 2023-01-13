@@ -20,8 +20,7 @@ function clicked() {
   const p = d3.mouse(this);
   const i = findCell(p[0], p[1]);
 
-  if (grand.id === "emblems") editEmblem();
-  else if (parent.id === "rivers") editRiver(el.id);
+  if (parent.id === "rivers") editRiver(el.id);
   else if (grand.id === "routes") editRoute();
   else if (el.tagName === "tspan" && grand.parentNode.parentNode.id === "labels") editLabel();
   else if (grand.id === "burgLabels") editBurg();
@@ -146,12 +145,7 @@ function addBurg(point) {
   const population = Math.max((cells.s[cell] + cells.road[cell]) / 3 + i / 1000 + (cell % 100) / 1000, 0.1);
   const type = BurgsAndStates.getType(cell, false);
 
-  // generate emblem
-  const coa = COA.generate(pack.states[state].coa, 0.25, null, type);
-  coa.shield = COA.getShield(culture, state);
-  COArenderer.add("burg", i, coa, x, y);
-
-  pack.burgs.push({name, cell, x, y, state, i, culture, feature, capital: 0, port: 0, temple, population, coa, type});
+  pack.burgs.push({name, cell, x, y, state, i, culture, feature, capital: 0, port: 0, temple, population, type});
   cells.burg[cell] = i;
 
   const townSize = burgIcons.select("#towns").attr("size") || 0.5;
@@ -235,12 +229,6 @@ function removeBurg(id) {
   burg.removed = true;
   cells.burg[burg.cell] = 0;
 
-  if (burg.coa) {
-    const coaId = "burgCOA" + id;
-    if (byId(coaId)) byId(coaId).remove();
-    emblems.select(`#burgEmblems > use[data-i='${id}']`).remove();
-    delete burg.coa; // remove to save data
-  }
 }
 
 function toggleCapital(burg) {

@@ -255,11 +255,6 @@
     "stroke-width": 1,
     "filter": "url(#dropShadow01)"
   },
-  "#emblems": {
-    "opacity": 1,
-    "stroke-width": 1,
-    "filter": null
-  },
   "#texture": {
     "opacity": null,
     "filter": null,

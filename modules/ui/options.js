@@ -1,97 +1,282 @@
+{/* <option value="political" selected>Political map</option>
+<option value="cultural">Cultural map</option>
+<option value="religions">Religions map</option>
+<option value="provinces">Provinces map</option>
+<option value="biomes">Biomes map</option>
+<option value="heightmap">Heightmap</option>
+<option value="physical">Physical map</option>
+<option value="poi">Places of interest</option>
+<option value="military">Military map</option>
+<option value="landmass">Pure landmass</option> */}
+
+let styleGroupSelect = {
+  value: "ancient",
+}
+let rescaleLabels = {checked: true};
+let hideLabels = {checked: true};
+let layersPresetSelected = "military";
+let resolveDepressionsStepsOutput = 250;
+let elevationLimit = 20;
+let templateInput = "world";
+let zoomExtentMin = {
+  min:".2",
+  step:".1",
+  max:"20",
+  value:"1"
+};
+let zoomExtentMax = {
+  min:"1",
+  max:"50",
+  value:"20"
+};
+let pointsInput = {
+  value: 4,
+  dataset: {
+    cells: 10000
+  }
+}
+
+layerData = new Map();
+layerData.set("TextureLayer",{
+  dataShortcut: "X",
+  isOn: false
+});
+layerData.set("HeightLayer",{
+  dataShortcut: "H",
+  isOn: false
+});
+layerData.set("BiomesLayer",{
+  dataShortcut: "B",
+  isOn: false
+});
+layerData.set("CellsLayer",{
+  dataShortcut: "E",
+  isOn: false
+});
+layerData.set("GridLayer",{
+  dataShortcut: "G",
+  isOn: false
+});
+layerData.set("CoordinatesLayer",{
+  dataShortcut: "O",
+  isOn: false
+});
+layerData.set("CompassLayer",{
+  dataShortcut: "W",
+  isOn: false
+});
+layerData.set("RiversLayer",{
+  dataShortcut: "V",
+  isOn: false
+});
+layerData.set("ReliefLayer",{
+  dataShortcut: "F",
+  isOn: false
+});
+layerData.set("ReligionsLayer",{
+  dataShortcut: "R",
+  isOn: false
+});
+layerData.set("CulturesLayer",{
+  dataShortcut: "C",
+  isOn: false
+});
+layerData.set("StatesLayer",{
+  dataShortcut: "S",
+  isOn: false
+});
+layerData.set("ProvincesLayer",{
+  dataShortcut: "P",
+  isOn: false
+});
+layerData.set("ZonesLayer",{
+  dataShortcut: "Z",
+  isOn: false
+});
+layerData.set("BordersLayer",{
+  dataShortcut: "D",
+  isOn: false
+});
+layerData.set("RoutesLayer",{
+  dataShortcut: "U",
+  isOn: false
+});
+layerData.set("TempLayer",{
+  dataShortcut: "T",
+  isOn: false
+});
+layerData.set("PopulationLayer",{
+  dataShortcut: "N",
+  isOn: false
+});
+layerData.set("IceLayer",{
+  dataShortcut: "J",
+  isOn: false
+});
+layerData.set("PrecLayer",{
+  dataShortcut: "A",
+  isOn: false
+});
+layerData.set("LabelsLayer",{
+  dataShortcut: "L",
+  isOn: false
+});
+layerData.set("IconsLayer",{
+  dataShortcut: "I",
+  isOn: false
+});
+layerData.set("MilitaryLayer",{
+  dataShortcut: "M",
+  isOn: false
+});
+layerData.set("MarkersLayer",{
+  dataShortcut: "K",
+  isOn: false
+});
+layerData.set("RulersLayer",{
+  dataShortcut: "= (equal sign)",
+  isOn: false
+});
+layerData.set("ScaleBarLayer",{
+dataShortcut: "/ (slash sign)",
+isOn: false
+});
+
+let culturesInput = {value: 30, min: 1, max: 32};
+let powerInput = {value: 5, min: 0, max: 10};
+
+let culturesSet = new Map();
+culturesSet.set("world", 32);
+culturesSet.set("european", 15);
+culturesSet.set("oriental", 13);
+culturesSet.set("english", 10);
+culturesSet.set("antique", 10);
+culturesSet.set("highFantasy", 17);
+culturesSet.set("darkFantasy", 18);
+culturesSet.set("random", 100);
+
+let precInput = {};
+let temperatureEquatorInput = {min:"-50", max:"50" };
+let temperatureEquatorOutput = {min:"-50", max:"50" };
+let temperaturePoleInput = {min: "-50", max: "50" };
+let temperaturePoleOutput = {min: "-50", max: "50" };
+let mapSizeInput = {min: "1", max: "100" };
+let mapSizeOutput = {min: "1", max: "100" };
+let latitudeInput = {min: "0", max: "100", step: "1" };
+let cultureSelected = "european";
+let latitudeOutput = {
+                  type: "range",
+                  min: "0",
+                  max: "100",
+                  step: "1",
+                  style: "width: 10.3em"
+                }
+let mapWidthInput =  {  "min":240, "value":3440 };
+let mapHeightInput =  {  "min":135, "value":3000 };
+let optionsSeed =  {  "min":1, "max":999999999}
+let culturesOutput =  { "min":1, "max":32, "value":14 };
+let regionsInput =  { "min":0, "max":99, "value":13 };
+let regionsOutput =  { "min":0, "max":999, "value":13 };
+let provincesInput =  { "min":0, "max":100, "value":30 };
+let provincesOutput =  { "min":0, "max":100, "value":30 };
+let powerOutput =  { "min":0, "max":10, "value":5 };
+let neutralInput =  { "min":.1, "max":2, "value":1 };
+let neutralOutput =  { "min":.1, "max":2, "value":1 };
+let manorsInput =  { "min":0, "max":1000, "value": 1000 };
+let religionsInput =  { "min":0, "max":50, "value": 15 };
+let uiSizeInput =  { "min":.6, "max":3 };
+let uiSizeOutput =  { "min":.6, "max":3 };
+let tooltipSizeInput =  { "min":4, "max":32, "value":14 };
+let tooltipSizeOutput =  { "min":0, "max":256, "value":14 };
+let themeHueInput =  { "min":0, "max":359, };
+let transparencyInput =  { "min":0, "max":100, };
+let transparencyOutput =  { "min":0, "max":100, };
+let precOutput =  { "min":0, "max":500, "value":50 };
+let riverSourceWidth =  { "min":0, "max":3, };
+let riverWidthFactor =  { "min":.1, "max":4, };
+let epScaleRange =  { "min":1, "max":100, "value":5};
+let iceSize =  { "min":.05, "max":1 };
+let rescaleLower =  { "value":20, "min":0, "max":100 };
+let rescaleHigher =  { "value":100, "min":1, "max":100 };
+let rescaleModifier =  { "value":0.9, "min":0, "max":1.5 };
+let convertColors =  { "value":100};
+let distanceScaleOutput =  { "min":.01, "max":20, "value":3 };
+let heightExponentOutput =  { "min":1.5, "max":2.2, "value":2 };
+let barSizeOutput =  { "min":.5, "max":5, "value":2 };
+let barSizeInput =  { "min":.5, "max":5, "value":2 };
+let barBackColor =  { "value": "#ffffff" };
+let barPosX =  { "min":0, "max":100, "value":99 };
+let options3dMeshRotationRange =  { "min":0, "max":10, };
+let options3dScaleRange =  { "min":0, "max":100, };
+let options3dLightnessRange =  { "min":0, "max":100, };
+let = options3dGlobeRotationRange =  { "min":0, "max":10, };
+let pngResolutionOutput =  { "min":1, "max":8, "value":1 };
+let submapPointsInput =  { "min":1, "max":13, "value":4 };
+let submapAngleInput =  { "min":0, "max":359, "value":0 };
+let submapScaleInput =  { "min":-25, "max":25, "value":0 };
+
+let styleOpacityInput = { min: 0, max: 1, step: "0.01", value: "0.4"};
+let styleLegendColItems = { min: 1, max: 30, step: "1", value: "8"};
+let styleLegendBack = {value: "#ffffff"};
+let styleLegendOpacity = { min: 0, max: 1, step: "0.01", value: "1"};
+let stylePopulationRuralStrokeInput = {value: "#0000ff"};
+let stylePopulationUrbanStrokeInput = {value: "#ff0000"};
+let styleTextureShiftX = {value: "0" };
+let styleTextureShiftY = {value: "0" };
+let styleOceanPatternOpacity = { min: 0, max: 1, step: "0.01", value: "0.2"};
+let styleOceanFill = {value: "#466eab"};
+let styleGridScale = { min: .1, max: 10, step: "0.01"};
+let styleCompassSizeInput = { min: .02, max: 1, step: "0.01", value: "0.25"};
+let styleCompassShiftX = { value: "80" };
+let styleCompassShiftY = {value: "80" };
+let styleReliefSizeInput = { min: .2, max: 4, step: "0.01"};
+let styleFillInput = {value: "#5E4FA2"};
+let styleStrokeInput = {value: "#5E4FA2"};
+let styleStrokeWidthInput = { min: 0, max: 5, step: "0.01", value: "1"};
+let styleStrokeDasharrayInput = { value: "1 2", style: "width: 26%"};
+let styleShadowInput = {value: "0 0 4px white"};
+let styleFontSize = { min: .5, max: 100, step: "0.1", value: "14"};
+let styleRadiusInput = { min: .2, max: 10, step: "0.02", value: "1"};
+let styleIconSizeInput = { min: .2, max: 10, step: "0.02", value: "1"};
+let styleCoastlineAuto = { class: "checkbox"};
+let styleTemperatureFillOpacityInput = { min: 0, max: 1, step: "0.01", value: "0.3"};
+let styleTemperatureFontSizeInput = { min: 0, max: 30, value: "8"};
+let styleTemperatureFillInput = {};
+let styleStatesBodyOpacity = { min: 0, max: 1, step: "0.01"};
+let styleStatesHaloWidth = { min: 0, max: 30, step: "0.1", value: "10"};
+let styleStatesHaloOpacity = { min: 0, max: 1, step: "0.01", value: "1"};
+let styleStatesHaloBlur = { min: 0, max: 10, step: "0.01", value: "4"};
+let styleHeightmapTerracingInput = { min: 0, max: 20, step: "1"};
+let styleHeightmapSkipInput = { min: 0, max: 10, step: "1", value: "5"};
+let styleHeightmapSimplificationInput = { min: 0, max: 10, step: "1", value: "0"};
+let styleArmiesFillOpacity = { min: 0, max: 1, step: "0.01", value: "1"};
+let styleArmiesSize = { min: 1, max: 10, step: "0.1", value: "3"};
+let styleRescaleMarkers = { class: "checkbox"};
+let styleOpacityOutput = { min: 0, max: 1, step: "0.01", value: "0.4"};
+let stylePopulationRuralStrokeOutput = {value: "#0000ff"};
+let stylePopulationUrbanStrokeOutput = {value: "#ff0000"};
+let styleCompassSizeOutput = { min: .02, max: 1, step: "0.01", value: "0.25"};
+let styleReliefSizeOutput = { min: .2, max: 4, step: "0.01"};
+let styleFillOutput = {value: "#5E4FA2"};
+let styleStrokeOutput = {value: "#5E4FA2"};
+let styleStrokeWidthOutput = { min: 0, max: 5, step: "0.01", value: "1"};
+let styleStrokeDasharrayOutput = { value: "1 2", style: "width: 26%"};
+let styleShadowOutput = {value: "0 0 4px white"};
+let styleRadiusOutput = { min: .2, max: 10, step: "0.02", value: "1"};
+let styleIconSizeOutput = { min: .2, max: 10, step: "0.02", value: "1"};
+let styleTemperatureFillOpacityOutput = { min: 0, max: 1, step: "0.01", value: "0.3"};
+let styleTemperatureFontSizeOutput = { min: 0, max: 30, value: "8"};
+let styleTemperatureFillOutput = {};
+let styleHeightmapTerracingOutput = { min: 0, max: 20, step: "1"};
+let styleHeightmapSkipOutput = { min: 0, max: 10, step: "1", value: "5"};
+let styleHeightmapSimplificationOutput = { min: 0, max: 10, step: "1", value: "0"};
+
 // UI module to control the options (preferences)
 "use strict";
 
 $("#optionsContainer").draggable({handle: ".drag-trigger", snap: "svg", snapMode: "both"});
 $("#exitCustomization").draggable({handle: "div"});
 $("#mapLayers").disableSelection();
-
-// remove glow if tip is aknowledged
-if (stored("disable_click_arrow_tooltip")) {
-  clearMainTip();
-  optionsTrigger.classList.remove("glow");
-}
-
-// Show options pane on trigger click
-function showOptions(event) {
-  if (!stored("disable_click_arrow_tooltip")) {
-    clearMainTip();
-    localStorage.setItem("disable_click_arrow_tooltip", true);
-    optionsTrigger.classList.remove("glow");
-  }
-
-  regenerate.style.display = "none";
-  document.getElementById("options").style.display = "block";
-  optionsTrigger.style.display = "none";
-
-  if (event) event.stopPropagation();
-}
-
-// Hide options pane on trigger click
-function hideOptions(event) {
-  document.getElementById("options").style.display = "none";
-  optionsTrigger.style.display = "block";
-  if (event) event.stopPropagation();
-}
-
-// To toggle options on hotkey press
-function toggleOptions(event) {
-  if (document.getElementById("options").style.display === "none") showOptions(event);
-  else hideOptions(event);
-}
-
-// Toggle "New Map!" pane on hover
-optionsTrigger.addEventListener("mouseenter", function () {
-  if (optionsTrigger.classList.contains("glow")) return;
-  if (document.getElementById("options").style.display === "none") regenerate.style.display = "block";
-});
-
-collapsible.addEventListener("mouseleave", function () {
-  regenerate.style.display = "none";
-});
-
-// Activate options tab on click
-document
-  .getElementById("options")
-  .querySelector("div.tab")
-  .addEventListener("click", function (event) {
-    if (event.target.tagName !== "BUTTON") return;
-    const id = event.target.id;
-    const active = document.getElementById("options").querySelector(".tab > button.active");
-    if (active && id === active.id) return; // already active tab is clicked
-
-    if (active) active.classList.remove("active");
-    document.getElementById(id).classList.add("active");
-    document
-      .getElementById("options")
-      .querySelectorAll(".tabcontent")
-      .forEach(e => (e.style.display = "none"));
-
-    if (id === "layersTab") layersContent.style.display = "block";
-    else if (id === "styleTab") styleContent.style.display = "block";
-    else if (id === "optionsTab") optionsContent.style.display = "block";
-    else if (id === "toolsTab")
-      customization === 1 ? (customizationMenu.style.display = "block") : (toolsContent.style.display = "block");
-    else if (id === "aboutTab") aboutContent.style.display = "block";
-  });
-
-// show popup with a list of Patreon supportes (updated manually)
-async function showSupporters() {
-  const {supporters} = await import("../dynamic/supporters.js?v=19062022");
-  alertMessage.innerHTML =
-    "<ul style='column-count: 5; column-gap: 2em'>" + supporters.map(n => `<li>${n}</li>`).join("") + "</ul>";
-  $("#alert").dialog({
-    resizable: false,
-    title: "Patreon Supporters",
-    width: "54vw",
-    position: {my: "center", at: "center", of: "svg"}
-  });
-}
-
-// on any option or dialog change
-document.getElementById("options").addEventListener("change", storeValueIfRequired);
-document.getElementById("dialogs").addEventListener("change", storeValueIfRequired);
-document.getElementById("options").addEventListener("input", updateOutputToFollowInput);
-document.getElementById("dialogs").addEventListener("input", updateOutputToFollowInput);
 
 function storeValueIfRequired(ev) {
   if (ev.target.dataset.stored) lock(ev.target.dataset.stored);
@@ -113,48 +298,6 @@ function updateOutputToFollowInput(ev) {
     if (input) input.value = value;
   }
 }
-
-// Option listeners
-const optionsContent = document.getElementById("optionsContent");
-optionsContent.addEventListener("input", function (event) {
-  const id = event.target.id;
-  const value = event.target.value;
-  if (id === "mapWidthInput" || id === "mapHeightInput") mapSizeInputChange();
-  else if (id === "pointsInput") changeCellsDensity(+value);
-  else if (id === "culturesSet") changeCultureSet();
-  else if (id === "regionsInput" || id === "regionsOutput") changeStatesNumber(value);
-  else if (id === "emblemShape") changeEmblemShape(value);
-  else if (id === "tooltipSizeInput" || id === "tooltipSizeOutput") changeTooltipSize(value);
-  else if (id === "themeHueInput") changeThemeHue(value);
-  else if (id === "themeColorInput") changeDialogsTheme(themeColorInput.value, transparencyInput.value);
-  else if (id === "transparencyInput") changeDialogsTheme(themeColorInput.value, value);
-});
-
-optionsContent.addEventListener("change", function (event) {
-  const id = event.target.id;
-  const value = event.target.value;
-
-  if (id === "zoomExtentMin" || id === "zoomExtentMax") changeZoomExtent(value);
-  else if (id === "optionsSeed") generateMapWithSeed("seed change");
-  else if (id === "uiSizeInput" || id === "uiSizeOutput") changeUIsize(value);
-  else if (id === "shapeRendering") setRendering(value);
-  else if (id === "yearInput") changeYear();
-  else if (id === "eraInput") changeEra();
-  else if (id === "stateLabelsModeInput") options.stateLabelsMode = value;
-});
-
-optionsContent.addEventListener("click", function (event) {
-  const id = event.target.id;
-  if (id === "toggleFullscreen") toggleFullscreen();
-  else if (id === "optionsMapHistory") showSeedHistoryDialog();
-  else if (id === "optionsCopySeed") copyMapURL();
-  else if (id === "optionsEraRegenerate") regenerateEra();
-  else if (id === "templateInputContainer") openTemplateSelectionDialog();
-  else if (id === "zoomExtentDefault") restoreDefaultZoomExtent();
-  else if (id === "translateExtent") toggleTranslateExtent(event.target);
-  else if (id === "speakerTest") testSpeaker();
-  else if (id === "themeColorRestore") restoreDefaultThemeColor();
-});
 
 function mapSizeInputChange() {
   changeMapSize();
@@ -230,32 +373,6 @@ function toggleTranslateExtent(el) {
     ]);
 }
 
-// add voice options
-const voiceInterval = setInterval(function () {
-  const voices = speechSynthesis.getVoices();
-  if (voices.length) clearInterval(voiceInterval);
-  else return;
-
-  const select = document.getElementById("speakerVoice");
-  voices.forEach((voice, i) => {
-    select.options.add(new Option(voice.name, i, false));
-  });
-  if (stored("speakerVoice")) select.value = stored("speakerVoice");
-  // se voice to store
-  else select.value = voices.findIndex(voice => voice.lang === "en-US"); // or to first found English-US
-}, 1000);
-
-function testSpeaker() {
-  const text = `${mapName.value}, ${options.year} ${options.era}`;
-  const speaker = new SpeechSynthesisUtterance(text);
-  const voices = speechSynthesis.getVoices();
-  if (voices.length) {
-    const voiceId = +document.getElementById("speakerVoice").value;
-    speaker.voice = voices[voiceId];
-  }
-  speechSynthesis.speak(speaker);
-}
-
 function generateMapWithSeed() {
   if (optionsSeed.value === seed) return tip("The current map already has this seed", false, "error");
   regeneratePrompt({seed: optionsSeed.value});
@@ -284,9 +401,7 @@ function restoreSeed(id) {
   byId("optionsSeed").value = seed;
   byId("mapWidthInput").value = width;
   byId("mapHeightInput").value = height;
-  byId("templateInput").value = template;
-
-  if (locked("template")) unlock("template");
+  templateInput = template;
 
   regeneratePrompt({seed});
 }
@@ -346,48 +461,6 @@ function changeCultureSet() {
   const max = culturesSet.selectedOptions[0].dataset.max;
   culturesInput.max = culturesOutput.max = max;
   if (+culturesOutput.value > +max) culturesInput.value = culturesOutput.value = max;
-}
-
-function changeEmblemShape(emblemShape) {
-  const image = document.getElementById("emblemShapeImage");
-  const shapePath = window.COArenderer && COArenderer.shieldPaths[emblemShape];
-  shapePath ? image.setAttribute("d", shapePath) : image.removeAttribute("d");
-
-  const specificShape = ["culture", "state", "random"].includes(emblemShape) ? null : emblemShape;
-  if (emblemShape === "random")
-    pack.cultures.filter(c => !c.removed).forEach(c => (c.shield = Cultures.getRandomShield()));
-
-  const rerenderCOA = (id, coa) => {
-    const coaEl = document.getElementById(id);
-    if (!coaEl) return; // not rendered
-    coaEl.remove();
-    COArenderer.trigger(id, coa);
-  };
-
-  pack.states.forEach(state => {
-    if (!state.i || state.removed || !state.coa || state.coa === "custom") return;
-    const newShield = specificShape || COA.getShield(state.culture, null);
-    if (newShield === state.coa.shield) return;
-    state.coa.shield = newShield;
-    rerenderCOA("stateCOA" + state.i, state.coa);
-  });
-
-  pack.provinces.forEach(province => {
-    if (!province.i || province.removed || !province.coa || province.coa === "custom") return;
-    const culture = pack.cells.culture[province.center];
-    const newShield = specificShape || COA.getShield(culture, province.state);
-    if (newShield === province.coa.shield) return;
-    province.coa.shield = newShield;
-    rerenderCOA("provinceCOA" + province.i, province.coa);
-  });
-
-  pack.burgs.forEach(burg => {
-    if (!burg.i || burg.removed || !burg.coa || burg.coa === "custom") return;
-    const newShield = specificShape || COA.getShield(burg.culture, burg.state);
-    if (newShield === burg.coa.shield) return;
-    burg.coa.shield = newShield;
-    rerenderCOA("burgCOA" + burg.i, burg.coa);
-  });
 }
 
 function changeStatesNumber(value) {
@@ -483,7 +556,7 @@ function applyStoredOptions() {
   const heightmapId = stored("template");
   if (heightmapId) {
     const name = heightmapTemplates[heightmapId]?.name || precreatedHeightmaps[heightmapId]?.name || heightmapId;
-    applyOption(byId("templateInput"), heightmapId, name);
+    applyOption(templateInput, heightmapId, name);
   }
 
   if (stored("distanceUnit")) applyOption(distanceUnitInput, stored("distanceUnit"));
@@ -539,34 +612,34 @@ function randomizeOptions() {
   const randomize = new URL(window.location.href).searchParams.get("options") === "default"; // ignore stored options
 
   // 'Options' settings
-  if (randomize || !locked("template")) randomizeHeightmapTemplate();
-  if (randomize || !locked("regions")) regionsInput.value = regionsOutput.value = gauss(18, 5, 2, 30);
-  if (randomize || !locked("provinces")) provincesInput.value = provincesOutput.value = gauss(20, 10, 20, 100);
-  if (randomize || !locked("manors")) {
+  if (randomize) randomizeHeightmapTemplate();
+  if (randomize) regionsInput.value = regionsOutput.value = gauss(18, 5, 2, 30);
+  if (randomize) provincesInput.value = provincesOutput.value = gauss(20, 10, 20, 100);
+  if (randomize) {
     manorsInput.value = 1000;
     manorsOutput.value = "auto";
   }
-  if (randomize || !locked("religions")) religionsInput.value = religionsOutput.value = gauss(5, 2, 2, 10);
-  if (randomize || !locked("power")) powerInput.value = powerOutput.value = gauss(4, 2, 0, 10, 2);
-  if (randomize || !locked("neutral")) neutralInput.value = neutralOutput.value = rn(1 + Math.random(), 1);
-  if (randomize || !locked("cultures")) culturesInput.value = culturesOutput.value = gauss(12, 3, 5, 30);
-  if (randomize || !locked("culturesSet")) randomizeCultureSet();
+  if (randomize) religionsInput.value = religionsOutput.value = gauss(5, 2, 2, 10);
+  if (randomize) powerInput.value = powerOutput.value = gauss(4, 2, 0, 10, 2);
+  if (randomize) neutralInput.value = neutralOutput.value = rn(1 + Math.random(), 1);
+  if (randomize) culturesInput.value = culturesOutput.value = gauss(12, 3, 5, 30);
+  if (randomize) randomizeCultureSet();
 
   // 'Configure World' settings
-  if (randomize || !locked("prec")) precInput.value = precOutput.value = gauss(100, 40, 5, 500);
+  if (randomize) precInput.value = precOutput.value = gauss(100, 40, 5, 500);
   const tMax = 30,
     tMin = -30; // temperature extremes
-  if (randomize || !locked("temperatureEquator"))
+  if (randomize)
     temperatureEquatorOutput.value = temperatureEquatorInput.value = rand(tMax - 10, tMax);
-  if (randomize || !locked("temperaturePole"))
+  if (randomize)
     temperaturePoleOutput.value = temperaturePoleInput.value = rand(tMin, tMin + 30);
 
   // 'Units Editor' settings
   const US = navigator.language === "en-US";
-  if (randomize || !locked("distanceScale")) distanceScaleOutput.value = distanceScaleInput.value = gauss(3, 1, 1, 5);
-  if (!stored("distanceUnit")) distanceUnitInput.value = US ? "mi" : "km";
-  if (!stored("heightUnit")) heightUnit.value = US ? "ft" : "m";
-  if (!stored("temperatureScale")) temperatureScale.value = US ? "°F" : "°C";
+  if (randomize) distanceScaleOutput.value = distanceScaleInput.value = gauss(3, 1, 1, 5);
+  distanceUnitInput.value = "mi";
+  heightUnit.value = "ft";
+  temperatureScale.value = "°F";
 
   // World settings
   generateEra();
@@ -580,7 +653,7 @@ function randomizeHeightmapTemplate() {
   }
   const template = rw(templates);
   const name = heightmapTemplates[template].name;
-  applyOption(byId("templateInput"), template, name);
+  applyOption(templateInput, template, name);
 }
 
 // select culture set pseudo-randomly
@@ -661,16 +734,6 @@ function restoreDefaultOptions() {
   localStorage.clear();
   location.reload();
 }
-
-// Sticked menu Options listeners
-document.getElementById("sticked").addEventListener("click", function (event) {
-  const id = event.target.id;
-  if (id === "newMapButton") regeneratePrompt();
-  else if (id === "saveButton") showSavePane();
-  else if (id === "exportButton") showExportPane();
-  else if (id === "loadButton") showLoadPane();
-  else if (id === "zoomReset") resetZoom(1000);
-});
 
 function regeneratePrompt(options) {
   if (customization)
@@ -901,21 +964,6 @@ function updateTilesOptions() {
     labels.join("") +
     "</g>";
   debug.html(rectsG + labelsG);
-}
-
-// View mode
-viewMode.addEventListener("click", changeViewMode);
-function changeViewMode(event) {
-  const button = event.target;
-  if (button.tagName !== "BUTTON") return;
-  const pressed = button.classList.contains("pressed");
-  enterStandardView();
-
-  if (!pressed && button.id !== "viewStandard") {
-    viewStandard.classList.remove("pressed");
-    button.classList.add("pressed");
-    enter3dView(button.id);
-  }
 }
 
 function enterStandardView() {

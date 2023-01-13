@@ -63,7 +63,7 @@ window.HeightmapGenerator = (function () {
 
   const generate = async function (graph) {
     TIME && console.time("defineHeightmap");
-    const id = byId("templateInput").value;
+    const id = templateInput;
 
     Math.random = aleaPRNG(seed);
     const isTemplate = id in heightmapTemplates;

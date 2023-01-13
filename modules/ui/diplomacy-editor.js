@@ -109,10 +109,8 @@ function editDiplomacy() {
     const selectedId = selectedLine ? +selectedLine.dataset.id : states.find(s => s.i && !s.removed).i;
     const selectedName = states[selectedId].name;
 
-    COArenderer.trigger("stateCOA" + selectedId, states[selectedId].coa);
     let lines = /* html */ `<div class="states Self" data-id=${selectedId} data-tip="List below shows relations to ${selectedName}">
       <div style="width: max-content">${states[selectedId].fullName}</div>
-      <svg class="coaIcon" viewBox="0 0 200 200"><use href="#stateCOA${selectedId}"></use></svg>
     </div>`;
 
     for (const state of states) {
@@ -125,10 +123,8 @@ function editDiplomacy() {
       const tipChange = `Click to change relations. ${tip}`;
 
       const name = state.fullName.length < 23 ? state.fullName : state.name;
-      COArenderer.trigger("stateCOA" + state.i, state.coa);
 
       lines += /* html */ `<div class="states" data-id=${state.i} data-name="${name}" data-relations="${relation}">
-        <svg data-tip="${tipSelect}" class="coaIcon" viewBox="0 0 200 200"><use href="#stateCOA${state.i}"></use></svg>
         <div data-tip="${tipSelect}" style="width: 12em">${name}</div>
         <div data-tip="${tipChange}" class="changeRelations" style="width: 6em">
           <fill-box fill="${color}" size=".9em"></fill-box>
@@ -239,9 +235,6 @@ function editDiplomacy() {
             <input id="selectState${s.i}" class="checkbox" type="checkbox" name="objectSelect" value="${s.i}"
             ${s.i === objectId && "checked"} />
             <label for="selectState${s.i}" class="checkbox-label">
-              <svg class="coaIcon" viewBox="0 0 200 200">
-                <use href="#stateCOA${s.i}"></use>
-              </svg>
               ${s.fullName}
             </label>
           </div>
@@ -252,9 +245,6 @@ function editDiplomacy() {
     alertMessage.innerHTML = /* html */ `
       <form id='relationsForm' style="overflow: hidden; display: flex; flex-direction: column; gap: .3em; padding: 0.1em 0;">
         <header>
-          <svg class="coaIcon" viewBox="0 0 200 200">
-            <use href="#stateCOA${subject.i}"></use>
-          </svg>
           <b>${subject.fullName}</b>
         </header>
 

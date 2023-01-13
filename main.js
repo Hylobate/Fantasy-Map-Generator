@@ -75,7 +75,6 @@ let coastline = viewbox.append("g").attr("id", "coastline");
 let ice = viewbox.append("g").attr("id", "ice").style("display", "none");
 let prec = viewbox.append("g").attr("id", "prec").style("display", "none");
 let population = viewbox.append("g").attr("id", "population");
-let emblems = viewbox.append("g").attr("id", "emblems").style("display", "none");
 let labels = viewbox.append("g").attr("id", "labels");
 let icons = viewbox.append("g").attr("id", "icons");
 let burgIcons = icons.append("g").attr("id", "burgIcons");
@@ -117,11 +116,6 @@ anchors.append("g").attr("id", "towns");
 // population groups
 population.append("g").attr("id", "rural");
 population.append("g").attr("id", "urban");
-
-// emblem groups
-emblems.append("g").attr("id", "burgEmblems");
-emblems.append("g").attr("id", "provinceEmblems");
-emblems.append("g").attr("id", "stateEmblems");
 
 // fogging
 fogging.append("rect").attr("x", 0).attr("y", 0).attr("width", "100%").attr("height", "100%");
@@ -187,13 +181,13 @@ let options = {
   stateLabelsMode: "auto"
 };
 let mapCoordinates = {}; // map coordinates on globe
-let populationRate = +document.getElementById("populationRateInput").value;
-let distanceScale = +document.getElementById("distanceScaleInput").value;
-let urbanization = +document.getElementById("urbanizationInput").value;
-let urbanDensity = +document.getElementById("urbanDensityInput").value;
+let populationRate = 1000;
+let distanceScale = 5;
+let urbanization = 1;
+let urbanDensity = 10;
 let statesNeutral = 1; // statesEditor growth parameter
 
-applyStoredOptions();
+// applyStoredOptions();
 
 // voronoi graph extension, cannot be changed after generation
 let graphWidth = +mapWidthInput.value;
@@ -220,26 +214,8 @@ oceanLayers
   .attr("height", graphHeight);
 
 document.addEventListener("DOMContentLoaded", async () => {
-  if (!location.hostname) {
-    const wiki = "https://github.com/Azgaar/Fantasy-Map-Generator/wiki/Run-FMG-locally";
-    alertMessage.innerHTML = /* html */ `Fantasy Map Generator cannot run serverless. Follow the <a href="${wiki}" target="_blank">instructions</a> on how you can
-      easily run a local web-server`;
-
-    $("#alert").dialog({
-      resizable: false,
-      title: "Loading error",
-      width: "28em",
-      position: {my: "center center-4em", at: "center", of: "svg"},
-      buttons: {
-        OK: function () {
-          $(this).dialog("close");
-        }
-      }
-    });
-  } else {
-    hideLoading();
-    await checkLoadParameters();
-  }
+  hideLoading();
+  await checkLoadParameters();
   restoreDefaultEvents(); // apply default viewbox events
 });
 
@@ -259,20 +235,6 @@ function showLoading() {
 async function checkLoadParameters() {
   const url = new URL(window.location.href);
   const params = url.searchParams;
-
-  // of there is a valid maplink, try to load .map file from URL
-  if (params.get("maplink")) {
-    WARN && console.warn("Load map from URL");
-    const maplink = params.get("maplink");
-    const pattern = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
-    const valid = pattern.test(maplink);
-    if (valid) {
-      setTimeout(() => {
-        loadMapFromURL(maplink, 1);
-      }, 1000);
-      return;
-    } else showUploadErrorMessage("Map link is not a valid URL", maplink);
-  }
 
   // if there is a seed (user of MFCG provided), generate map for it
   if (params.get("seed")) {
@@ -298,7 +260,7 @@ async function checkLoadParameters() {
         }
       });
     });
-
+  let onloadMap = {value: 0};
   if (onloadMap.value === "saved") {
     try {
       await loadLastMap();
@@ -317,7 +279,7 @@ async function generateMapOnLoad() {
   await applyStyleOnLoad(); // apply previously selected default or custom style
   await generate(); // generate map
   focusOn(); // based on searchParams focus on point, cell or burg from MFCG
-  applyPreset(); // apply saved layers preset
+  applyPreset();
 }
 
 // focus on coordinates, cell or burg provided in searchParams
@@ -514,19 +476,19 @@ function handleZoom(isScaleChanged, isPositionChanged) {
     drawScaleBar(scale);
   }
 
-  // zoom image converter overlay
-  if (customization === 1) {
-    const canvas = document.getElementById("canvas");
-    if (!canvas || canvas.style.opacity === "0") return;
+    // zoom image converter overlay
+    if (customization === 1) {
+      const canvas = document.getElementById("canvas");
+      if (!canvas || canvas.style.opacity === "0") return;
 
-    const img = document.getElementById("imageToConvert");
-    if (!img) return;
+      const img = document.getElementById("imageToConvert");
+      if (!img) return;
 
-    const ctx = canvas.getContext("2d");
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.setTransform(scale, 0, 0, scale, viewX, viewY);
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-  }
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.setTransform(scale, 0, 0, scale, viewX, viewY);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    }
 }
 
 // Zoom to a specific point
@@ -550,6 +512,7 @@ function getViewBoxExtent() {
 
 // active zooming feature
 function invokeActiveZooming() {
+  let shapeRendering = {value: "optimizeSpeed"};
   const isOptimized = shapeRendering.value === "optimizeSpeed";
 
   if (coastline.select("#sea_island").size() && +coastline.select("#sea_island").attr("auto-filter")) {
@@ -569,18 +532,6 @@ function invokeActiveZooming() {
       const hidden = hideLabels.checked && (relative * scale < 6 || relative * scale > 60);
       if (hidden) this.classList.add("hidden");
       else this.classList.remove("hidden");
-    });
-  }
-
-  // rescale emblems on zoom
-  if (emblems.style("display") !== "none") {
-    emblems.selectAll("g").each(function () {
-      const size = this.getAttribute("font-size") * scale;
-      const hidden = hideEmblems.checked && (size < 25 || size > 300);
-      if (hidden) this.classList.add("hidden");
-      else this.classList.remove("hidden");
-      if (!hidden && window.COArenderer && this.children.length && !this.children[0].getAttribute("href"))
-        renderGroupCOAs(this);
     });
   }
 
@@ -615,21 +566,6 @@ function invokeActiveZooming() {
   if (ruler.style("display") !== "none") {
     const size = rn((10 / scale ** 0.3) * 2, 2);
     ruler.selectAll("text").attr("font-size", size);
-  }
-}
-
-async function renderGroupCOAs(g) {
-  const [group, type] =
-    g.id === "burgEmblems"
-      ? [pack.burgs, "burg"]
-      : g.id === "provinceEmblems"
-      ? [pack.provinces, "province"]
-      : [pack.states, "state"];
-  for (let use of g.children) {
-    const i = +use.dataset.i;
-    const id = type + "COA" + i;
-    COArenderer.trigger(id, group[i].coa);
-    use.setAttribute("href", "#" + id);
   }
 }
 
@@ -690,7 +626,7 @@ async function generate(options) {
     INFO && console.group("Generated Map " + seed);
 
     applyMapSize();
-    randomizeOptions();
+    // randomizeOptions();
 
     if (shouldRegenerateGrid(grid, precreatedSeed)) grid = precreatedGraph || generateGrid();
     else delete grid.cells.h;
@@ -783,7 +719,6 @@ function setSeed(precreatedSeed) {
     seed = precreatedSeed;
   }
 
-  byId("optionsSeed").value = seed;
   Math.random = aleaPRNG(seed);
 }
 
@@ -854,8 +789,7 @@ function addLakesInDeepDepressions() {
   TIME && console.time("addLakesInDeepDepressions");
   const {cells, features} = grid;
   const {c, h, b} = cells;
-  const ELEVATION_LIMIT = +document.getElementById("lakeElevationLimitOutput").value;
-  if (ELEVATION_LIMIT === 80) return;
+  if (elevationLimit === 80) return;
 
   for (const i of cells.i) {
     if (b[i] || h[i] < 20) continue;
@@ -864,7 +798,7 @@ function addLakesInDeepDepressions() {
     if (h[i] > minHeight) continue;
 
     let deep = true;
-    const threshold = h[i] + ELEVATION_LIMIT;
+    const threshold = h[i] + elevationLimit;
     const queue = [i];
     const checked = [];
     checked[i] = true;
@@ -911,7 +845,7 @@ function addLakesInDeepDepressions() {
 
 // near sea lakes usually get a lot of water inflow, most of them should brake threshold and flow out to sea (see Ancylus Lake)
 function openNearSeaLakes() {
-  if (byId("templateInput").value === "Atoll") return; // no need for Atolls
+  if (templateInput === "Atoll") return; // no need for Atolls
 
   const cells = grid.cells;
   const features = grid.features;
@@ -952,11 +886,11 @@ function openNearSeaLakes() {
 function defineMapSize() {
   const [size, latitude] = getSizeAndLatitude();
   const randomize = new URL(window.location.href).searchParams.get("options") === "default"; // ignore stored options
-  if (randomize || !locked("mapSize")) mapSizeOutput.value = mapSizeInput.value = rn(size);
-  if (randomize || !locked("latitude")) latitudeOutput.value = latitudeInput.value = rn(latitude);
+  if (randomize) mapSizeOutput.value = mapSizeInput.value = rn(size);
+  if (randomize) latitudeOutput.value = latitudeInput.value = rn(latitude);
 
   function getSizeAndLatitude() {
-    const template = byId("templateInput").value; // heightmap template
+    const template = templateInput; // heightmap template
 
     if (template === "africa-centric") return [45, 53];
     if (template === "arabia") return [20, 35];
@@ -1008,8 +942,8 @@ function defineMapSize() {
 
 // calculate map position on globe
 function calculateMapCoordinates() {
-  const size = +document.getElementById("mapSizeOutput").value;
-  const latShift = +document.getElementById("latitudeOutput").value;
+  const size = +mapSizeOutput.value;
+  const latShift = +latitudeOutput.value;
 
   const latT = rn((size / 100) * 180, 1);
   const latN = rn(90 - ((180 - latT) * latShift) / 100, 1);
@@ -2004,7 +1938,7 @@ function addZones(number = 1) {
 
 // show map stats on generation complete
 function showStatistics() {
-  const heightmap = byId("templateInput").value;
+  const heightmap = templateInput;
   const isTemplate = heightmap in heightmapTemplates;
   const heightmapType = isTemplate ? "template" : "precreated";
   const isRandomTemplate = isTemplate && !locked("template") ? "random " : "";
@@ -2019,7 +1953,7 @@ function showStatistics() {
     Provinces: ${pack.provinces.length - 1}
     Burgs: ${pack.burgs.length - 1}
     Religions: ${pack.religions.length - 1}
-    Culture set: ${culturesSet.selectedOptions[0].innerText}
+    Culture set: ${cultureSelected}
     Cultures: ${pack.cultures.length - 1}`;
 
   mapId = Date.now(); // unique map id is it's creation date number
@@ -2030,7 +1964,7 @@ function showStatistics() {
 const regenerateMap = debounce(async function (options) {
   WARN && console.warn("Generate new random map");
 
-  const cellsDesired = +byId("pointsInput").dataset.cells;
+  const cellsDesired = pointsInput.dataset.cells;
   const shouldShowLoading = cellsDesired > 10000;
   shouldShowLoading && showLoading();
 
@@ -2054,7 +1988,6 @@ function undraw() {
     .getElementById("deftemp")
     .querySelectorAll("path, clipPath, svg")
     .forEach(el => el.remove());
-  document.getElementById("coas").innerHTML = ""; // remove auto-generated emblems
   notes = [];
   rulers = new Rulers();
   unfog();

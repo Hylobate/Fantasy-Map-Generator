@@ -2,10 +2,10 @@
 function editProvinces() {
   if (customization) return;
   closeDialogs("#provincesEditor, .stable");
-  if (!layerIsOn("toggleProvinces")) toggleProvinces();
-  if (!layerIsOn("toggleBorders")) toggleBorders();
-  if (layerIsOn("toggleStates")) toggleStates();
-  if (layerIsOn("toggleCultures")) toggleCultures();
+  if (!layerData.get("ProvincesLayer").isOn) toggleProvinces();
+  if (!layerData.get("BordersLayer").isOn) toggleBorders();
+  if (layerData.get("StatesLayer").isOn) toggleStates();
+  if (layerData.get("CulturesLayer").isOn) toggleCultures();
 
   provs.selectAll("text").call(d3.drag().on("drag", dragLabel)).classed("draggable", true);
   const body = document.getElementById("provincesBodySection");
@@ -47,7 +47,6 @@ function editProvinces() {
 
     if (el.tagName === "FILL-BOX") changeFill(el);
     else if (cl.contains("name")) editProvinceName(p);
-    else if (cl.contains("coaIcon")) editEmblem("province", "provinceCOA" + p, pack.provinces[p]);
     else if (cl.contains("icon-star-empty")) capitalZoomIn(p);
     else if (cl.contains("icon-flag-empty")) triggerIndependencePromps(p);
     else if (cl.contains("culturePopulation")) changePopulation(p);
@@ -131,7 +130,6 @@ function editProvinces() {
       const capital = p.burg ? pack.burgs[p.burg].name : "";
       const separable = p.burg && p.burg !== pack.states[p.state].capital;
       const focused = defs.select("#fog #focusProvince" + p.i).size();
-      COArenderer.trigger("provinceCOA" + p.i, p.coa);
       lines += /* html */ `<div
         class="states"
         data-id=${p.i}
@@ -145,7 +143,6 @@ function editProvinces() {
       >
         <fill-box fill="${p.color}"></fill-box>
         <input data-tip="Province name. Click to change" class="name pointer" value="${p.name}" readonly />
-        <svg data-tip="Click to show and edit province emblem" class="coaIcon pointer hide" viewBox="0 0 200 200"><use href="#provinceCOA${p.i}"></use></svg>
         <input data-tip="Province form name. Click to change" class="name pointer hide" value="${p.formName}" readonly />
         <span data-tip="Province capital. Click to zoom into view" class="icon-star-empty pointer hide ${p.burg ? "" : "placeholder"}"></span>
         <select
@@ -202,7 +199,7 @@ function editProvinces() {
     const el = body.querySelector(`div[data-id='${province}']`);
     if (el) el.classList.add("active");
 
-    if (!layerIsOn("toggleProvinces")) return;
+    if (!layerData.get("ProvincesLayer").isOn) return;
     if (customization) return;
     const animate = d3.transition().duration(2000).ease(d3.easeSinIn);
     provs
@@ -218,7 +215,7 @@ function editProvinces() {
     const el = body.querySelector(`div[data-id='${province}']`);
     if (el) el.classList.remove("active");
 
-    if (!layerIsOn("toggleProvinces")) return;
+    if (!layerData.get("ProvincesLayer").isOn) return;
     provs
       .select("#province" + province)
       .transition()
@@ -283,10 +280,6 @@ function editProvinces() {
     // difine new state attributes
     const {cell: center, culture} = burgs[burgId];
     const color = getRandomColor();
-    const coa = province.coa;
-    const coaEl = document.getElementById("provinceCOA" + provinceId);
-    if (coaEl) coaEl.id = "stateCOA" + newStateId;
-    emblems.select(`#provinceEmblems > use[data-i='${provinceId}']`).remove();
 
     // update cells
     cells.i
@@ -328,8 +321,7 @@ function editProvinces() {
       center,
       culture,
       military: [],
-      alert: 1,
-      coa
+      alert: 1
     });
 
     // remove old province
@@ -342,20 +334,13 @@ function editProvinces() {
   function updateStatesPostRelease(oldStates, newStates) {
     const allStates = unique([...oldStates, ...newStates]);
 
-    layerIsOn("toggleProvinces") && toggleProvinces();
-    layerIsOn("toggleStates") ? drawStates() : toggleStates();
-    layerIsOn("toggleBorders") ? drawBorders() : toggleBorders();
+    layerData.get("ProvincesLayer").isOn && toggleProvinces();
+    layerData.get("StatesLayer").isOn ? drawStates() : toggleStates();
+    layerData.get("BordersLayer").isOn ? drawBorders() : toggleBorders();
 
     BurgsAndStates.collectStatistics();
     BurgsAndStates.defineStateForms(newStates);
     BurgsAndStates.drawStateLabels(allStates);
-
-    // redraw emblems
-    allStates.forEach(stateId => {
-      emblems.select(`#stateEmblems > use[data-i='${stateId}']`)?.remove();
-      const {coa, pole} = pack.states[stateId];
-      COArenderer.add("state", stateId, coa, ...pole);
-    });
 
     unfog();
     closeDialogs();
@@ -452,16 +437,12 @@ function editProvinces() {
 
           unfog("focusProvince" + p);
 
-          const coaId = "provinceCOA" + p;
-          if (document.getElementById(coaId)) document.getElementById(coaId).remove();
-          emblems.select(`#provinceEmblems > use[data-i='${p}']`).remove();
-
           pack.provinces[p] = {i: p, removed: true};
 
           const g = provs.select("#provincesBody");
           g.select("#province" + p).remove();
           g.select("#province-gap" + p).remove();
-          if (!layerIsOn("toggleBorders")) toggleBorders();
+          if (!layerData.get("BordersLayer").isOn) toggleBorders();
           else drawBorders();
           refreshProvincesEditor();
           $(this).dialog("close");
@@ -767,8 +748,8 @@ function editProvinces() {
   }
 
   function enterProvincesManualAssignent() {
-    if (!layerIsOn("toggleProvinces")) toggleProvinces();
-    if (!layerIsOn("toggleBorders")) toggleBorders();
+    if (!layerData.get("ProvincesLayer").isOn) toggleProvinces();
+    if (!layerData.get("BordersLayer").isOn) toggleBorders();
 
     // make province and state borders more visible
     provinceBorders.select("path").attr("stroke", "#000").attr("stroke-width", 0.5);
@@ -895,9 +876,9 @@ function editProvinces() {
         pack.cells.province[i] = +this.dataset.province;
       });
 
-    if (!layerIsOn("toggleBorders")) toggleBorders();
+    if (!layerData.get("BordersLayer").isOn) toggleBorders();
     else drawBorders();
-    if (!layerIsOn("toggleProvinces")) toggleProvinces();
+    if (!layerData.get("ProvincesLayer").isOn) toggleProvinces();
     else drawProvinces();
     exitProvincesManualAssignment();
     refreshProvincesEditor();
@@ -965,15 +946,7 @@ function editProvinces() {
     const rndColor = getRandomColor();
     const color = stateColor[0] === "#" ? d3.color(d3.interpolate(stateColor, rndColor)(0.2)).hex() : rndColor;
 
-    // generate emblem
-    const kinship = burg ? 0.8 : 0.4;
-    const parent = burg ? pack.burgs[burg].coa : pack.states[state].coa;
-    const type = BurgsAndStates.getType(center, parent.port);
-    const coa = COA.generate(parent, kinship, P(0.1), type);
-    coa.shield = COA.getShield(c, state);
-    COArenderer.add("province", province, coa, point[0], point[1]);
-
-    provinces.push({i: province, state, center, burg, name, formName, fullName, color, coa});
+    provinces.push({i: province, state, center, burg, name, formName, fullName, color});
 
     cells.province[center] = province;
     cells.c[center].forEach(c => {
@@ -982,9 +955,9 @@ function editProvinces() {
       cells.province[c] = province;
     });
 
-    if (!layerIsOn("toggleBorders")) toggleBorders();
+    if (!layerData.get("BordersLayer").isOn) toggleBorders();
     else drawBorders();
-    if (!layerIsOn("toggleProvinces")) toggleProvinces();
+    if (!layerData.get("ProvincesLayer").isOn) toggleProvinces();
     else drawProvinces();
     collectStatistics();
     document.getElementById("provincesFilterState").value = state;
@@ -1010,7 +983,7 @@ function editProvinces() {
       p.color = stateColor[0] === "#" ? d3.color(d3.interpolate(stateColor, rndColor)(0.2)).hex() : rndColor;
     });
 
-    if (!layerIsOn("toggleProvinces")) toggleProvinces();
+    if (!layerData.get("ProvincesLayer").isOn) toggleProvinces();
     else drawProvinces();
   }
 
@@ -1046,21 +1019,15 @@ function editProvinces() {
       buttons: {
         Remove: function () {
           $(this).dialog("close");
-
-          // remove emblems
-          document.querySelectorAll("[id^='provinceCOA']").forEach(el => el.remove());
-          emblems.select("#provinceEmblems").selectAll("*").remove();
-
           // remove data
           pack.provinces = [0];
           pack.cells.province = new Uint16Array(pack.cells.i.length);
           pack.states.forEach(s => (s.provinces = []));
 
           unfog();
-          if (!layerIsOn("toggleBorders")) toggleBorders();
+          if (!layerData.get("BordersLayer").isOn) toggleBorders();
           else drawBorders();
           provs.select("#provincesBody").remove();
-          turnButtonOff("toggleProvinces");
 
           provincesEditorAddLines();
         },

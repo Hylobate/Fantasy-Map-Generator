@@ -236,7 +236,7 @@ window.Rivers = (function () {
   // depression filling algorithm (for a correct water flux modeling)
   const resolveDepressions = function (h) {
     const {cells, features} = pack;
-    const maxIterations = +document.getElementById("resolveDepressionsStepsOutput").value;
+    const maxIterations = resolveDepressionsStepsOutput;
     const checkLakeMaxIteration = maxIterations * 0.85;
     const elevateLakeMaxIteration = maxIterations * 0.75;
 

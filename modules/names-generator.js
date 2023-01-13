@@ -237,8 +237,8 @@ window.Names = (function () {
 
   // generato name for the map
   const getMapName = function (force) {
-    if (!force && locked("mapName")) return;
-    if (force && locked("mapName")) unlock("mapName");
+    if (!force) return;
+    if (force) unlock("mapName");
     const base = P(0.7) ? 2 : P(0.5) ? rand(0, 6) : rand(0, 31);
     if (!nameBases[base]) {
       tip("Namebase is not found", false, "error");

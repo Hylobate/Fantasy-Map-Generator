@@ -11,34 +11,9 @@
     return `<option value="url(#${id})">${name}</option>`;
   });
   const allOptions = emptyOption + options.join("");
-
-  document.getElementById("styleFilterInput").innerHTML = allOptions;
-  document.getElementById("styleStatesBodyFilter").innerHTML = allOptions;
-}
-
-// store some style inputs as options
-styleElements.addEventListener("change", function (ev) {
-  if (ev.target.dataset.stored) lock(ev.target.dataset.stored);
-});
-
-// select element to be edited
-function editStyle(element, group) {
-  showOptions();
-  styleTab.click();
-  styleElementSelect.value = element;
-  if (group) styleGroupSelect.options.add(new Option(group, group, true, true));
-  selectStyleElement();
-
-  styleElementSelect.classList.add("glow");
-  if (group) styleGroupSelect.classList.add("glow");
-  setTimeout(() => {
-    styleElementSelect.classList.remove("glow");
-    if (group) styleGroupSelect.classList.remove("glow");
-  }, 1500);
 }
 
 // Toggle style sections on element select
-styleElementSelect.addEventListener("change", selectStyleElement);
 function selectStyleElement() {
   const sel = styleElementSelect.value;
   let el = d3.select("#" + sel);
@@ -257,37 +232,12 @@ function selectStyleElement() {
     styleArmiesSize.value = styleArmiesSizeOutput.value = el.attr("box-size");
   }
 
-  if (sel === "emblems") {
-    styleEmblems.style.display = "block";
-    styleStrokeWidth.style.display = "block";
-    styleStrokeWidthInput.value = styleStrokeWidthOutput.value = el.attr("stroke-width") || 1;
-  }
-
-  // update group options
-  styleGroupSelect.options.length = 0; // remove all options
-  if (["routes", "labels", "coastline", "lakes", "anchors", "burgIcons", "borders"].includes(sel)) {
-    const groups = document.getElementById(sel).querySelectorAll("g");
-    groups.forEach(el => {
-      if (el.id === "burgLabels") return;
-      const option = new Option(`${el.id} (${el.childElementCount})`, el.id, false, false);
-      styleGroupSelect.options.add(option);
-    });
-    styleGroupSelect.value = el.attr("id");
-    styleGroup.style.display = "block";
-  } else {
-    styleGroupSelect.options.add(new Option(sel, sel, false, true));
-    styleGroup.style.display = "none";
-  }
-
   if (sel === "coastline" && styleGroupSelect.value === "sea_island") {
     styleCoastline.style.display = "block";
     const auto = (styleCoastlineAuto.checked = coastline.select("#sea_island").attr("auto-filter"));
     if (auto) styleFilter.style.display = "none";
   }
 }
-
-// Handle style inputs change
-styleGroupSelect.addEventListener("change", selectStyleElement);
 
 function getEl() {
   const el = styleElementSelect.value;
@@ -296,96 +246,11 @@ function getEl() {
   else return svg.select("#" + el).select("#" + g);
 }
 
-styleFillInput.addEventListener("input", function () {
-  styleFillOutput.value = this.value;
-  getEl().attr("fill", this.value);
-});
-
-styleStrokeInput.addEventListener("input", function () {
-  styleStrokeOutput.value = this.value;
-  getEl().attr("stroke", this.value);
-  if (styleElementSelect.value === "gridOverlay" && layerIsOn("toggleGrid")) drawGrid();
-});
-
-styleStrokeWidthInput.addEventListener("input", function () {
-  styleStrokeWidthOutput.value = this.value;
-  getEl().attr("stroke-width", +this.value);
-  if (styleElementSelect.value === "gridOverlay" && layerIsOn("toggleGrid")) drawGrid();
-});
-
-styleStrokeDasharrayInput.addEventListener("input", function () {
-  getEl().attr("stroke-dasharray", this.value);
-  if (styleElementSelect.value === "gridOverlay" && layerIsOn("toggleGrid")) drawGrid();
-});
-
-styleStrokeLinecapInput.addEventListener("change", function () {
-  getEl().attr("stroke-linecap", this.value);
-  if (styleElementSelect.value === "gridOverlay" && layerIsOn("toggleGrid")) drawGrid();
-});
-
-styleOpacityInput.addEventListener("input", function () {
-  styleOpacityOutput.value = this.value;
-  getEl().attr("opacity", this.value);
-});
-
-styleFilterInput.addEventListener("change", function () {
-  if (styleGroupSelect.value === "ocean") return oceanLayers.attr("filter", this.value);
-  getEl().attr("filter", this.value);
-});
-
-styleTextureInput.addEventListener("change", function () {
-  if (this.value === "none") texture.select("image").attr("xlink:href", "");
-  else getBase64(this.value, base64 => texture.select("image").attr("xlink:href", base64));
-});
-
-styleTextureShiftX.addEventListener("input", function () {
-  texture
-    .select("image")
-    .attr("x", this.value)
-    .attr("width", graphWidth - this.valueAsNumber);
-});
-
-styleTextureShiftY.addEventListener("input", function () {
-  texture
-    .select("image")
-    .attr("y", this.value)
-    .attr("height", graphHeight - this.valueAsNumber);
-});
-
-styleClippingInput.addEventListener("change", function () {
-  getEl().attr("mask", this.value);
-});
-
-styleGridType.addEventListener("change", function () {
-  getEl().attr("type", this.value);
-  if (layerIsOn("toggleGrid")) drawGrid();
-  calculateFriendlyGridSize();
-});
-
-styleGridScale.addEventListener("input", function () {
-  getEl().attr("scale", this.value);
-  if (layerIsOn("toggleGrid")) drawGrid();
-  calculateFriendlyGridSize();
-});
-
 function calculateFriendlyGridSize() {
   const size = styleGridScale.value * 25;
   const friendly = `${rn(size * distanceScaleInput.value, 2)} ${distanceUnitInput.value}`;
   styleGridSizeFriendly.value = friendly;
 }
-
-styleGridShiftX.addEventListener("input", function () {
-  getEl().attr("dx", this.value);
-  if (layerIsOn("toggleGrid")) drawGrid();
-});
-
-styleGridShiftY.addEventListener("input", function () {
-  getEl().attr("dy", this.value);
-  if (layerIsOn("toggleGrid")) drawGrid();
-});
-
-styleShiftX.addEventListener("input", shiftElement);
-styleShiftY.addEventListener("input", shiftElement);
 
 function shiftElement() {
   const x = styleShiftX.value || 0;
@@ -393,199 +258,10 @@ function shiftElement() {
   getEl().attr("transform", `translate(${x},${y})`);
 }
 
-styleRescaleMarkers.addEventListener("change", function () {
-  markers.attr("rescale", +this.checked);
-  invokeActiveZooming();
-});
-
-styleCoastlineAuto.addEventListener("change", function () {
-  coastline.select("#sea_island").attr("auto-filter", +this.checked);
-  styleFilter.style.display = this.checked ? "none" : "block";
-  invokeActiveZooming();
-});
-
-styleOceanFill.addEventListener("input", function () {
-  oceanLayers.select("rect").attr("fill", this.value);
-  styleOceanFillOutput.value = this.value;
-});
-
-styleOceanPattern.addEventListener("change", function () {
-  document.getElementById("oceanicPattern")?.setAttribute("href", this.value);
-});
-
-styleOceanPatternOpacity.addEventListener("input", function () {
-  document.getElementById("oceanicPattern").setAttribute("opacity", this.value);
-  styleOceanPatternOpacityOutput.value = this.value;
-});
-
-outlineLayers.addEventListener("change", function () {
-  oceanLayers.selectAll("path").remove();
-  oceanLayers.attr("layers", this.value);
-  OceanLayers();
-});
-
-styleHeightmapScheme.addEventListener("change", function () {
-  terrs.attr("scheme", this.value);
-  drawHeightmap();
-});
-
-styleHeightmapTerracingInput.addEventListener("input", function () {
-  terrs.attr("terracing", this.value);
-  drawHeightmap();
-});
-
-styleHeightmapSkipInput.addEventListener("input", function () {
-  terrs.attr("skip", this.value);
-  drawHeightmap();
-});
-
-styleHeightmapSimplificationInput.addEventListener("input", function () {
-  terrs.attr("relax", this.value);
-  drawHeightmap();
-});
-
-styleHeightmapCurve.addEventListener("change", function () {
-  terrs.attr("curve", this.value);
-  drawHeightmap();
-});
-
-styleReliefSet.addEventListener("change", function () {
-  terrain.attr("set", this.value);
-  ReliefIcons();
-  if (!layerIsOn("toggleRelief")) toggleRelief();
-});
-
-styleReliefSizeInput.addEventListener("change", function () {
-  terrain.attr("size", this.value);
-  styleReliefSizeOutput.value = this.value;
-  ReliefIcons();
-  if (!layerIsOn("toggleRelief")) toggleRelief();
-});
-
-styleReliefDensityInput.addEventListener("change", function () {
-  terrain.attr("density", this.value);
-  styleReliefDensityOutput.value = this.value;
-  ReliefIcons();
-  if (!layerIsOn("toggleRelief")) toggleRelief();
-});
-
-styleTemperatureFillOpacityInput.addEventListener("input", function () {
-  temperature.attr("fill-opacity", this.value);
-  styleTemperatureFillOpacityOutput.value = this.value;
-});
-
-styleTemperatureFontSizeInput.addEventListener("input", function () {
-  temperature.attr("font-size", this.value + "px");
-  styleTemperatureFontSizeOutput.value = this.value + "px";
-});
-
-styleTemperatureFillInput.addEventListener("input", function () {
-  temperature.attr("fill", this.value);
-  styleTemperatureFillOutput.value = this.value;
-});
-
-stylePopulationRuralStrokeInput.addEventListener("input", function () {
-  population.select("#rural").attr("stroke", this.value);
-  stylePopulationRuralStrokeOutput.value = this.value;
-});
-
-stylePopulationUrbanStrokeInput.addEventListener("input", function () {
-  population.select("#urban").attr("stroke", this.value);
-  stylePopulationUrbanStrokeOutput.value = this.value;
-});
-
-styleCompassSizeInput.addEventListener("input", function () {
-  styleCompassSizeOutput.value = this.value;
-  shiftCompass();
-});
-
-styleCompassShiftX.addEventListener("input", shiftCompass);
-styleCompassShiftY.addEventListener("input", shiftCompass);
-
 function shiftCompass() {
   const tr = `translate(${styleCompassShiftX.value} ${styleCompassShiftY.value}) scale(${styleCompassSizeInput.value})`;
   compass.select("use").attr("transform", tr);
 }
-
-styleLegendColItems.addEventListener("input", function () {
-  styleLegendColItemsOutput.value = this.value;
-  legend.select("#legendBox").attr("data-columns", this.value);
-  redrawLegend();
-});
-
-styleLegendBack.addEventListener("input", function () {
-  styleLegendBackOutput.value = this.value;
-  legend.select("#legendBox").attr("fill", this.value);
-});
-
-styleLegendOpacity.addEventListener("input", function () {
-  styleLegendOpacityOutput.value = this.value;
-  legend.select("#legendBox").attr("fill-opacity", this.value);
-});
-
-styleSelectFont.addEventListener("change", changeFont);
-function changeFont() {
-  const family = styleSelectFont.value;
-  getEl().attr("font-family", family);
-
-  if (styleElementSelect.value === "legend") redrawLegend();
-}
-
-styleShadowInput.addEventListener("input", function () {
-  getEl().style("text-shadow", this.value);
-});
-
-styleFontAdd.addEventListener("click", function () {
-  addFontNameInput.value = "";
-  addFontURLInput.value = "";
-
-  $("#addFontDialog").dialog({
-    title: "Add custom font",
-    width: "26em",
-    position: {my: "center", at: "center", of: "svg"},
-    buttons: {
-      Add: function () {
-        const family = addFontNameInput.value;
-        const src = addFontURLInput.value;
-        const method = addFontMethod.value;
-
-        if (!family) return tip("Please provide a font name", false, "error");
-
-        const existingFont = method === "fontURL" ? fonts.find(font => font.family === family && font.src === src) : fonts.find(font => font.family === family);
-        if (existingFont) return tip("The font is already added", false, "error");
-
-        if (method === "fontURL") addWebFont(family, src);
-        else if (method === "googleFont") addGoogleFont(family);
-        else if (method === "localFont") addLocalFont(family);
-
-        addFontNameInput.value = "";
-        addFontURLInput.value = "";
-        $(this).dialog("close");
-      },
-      Cancel: function () {
-        $(this).dialog("close");
-      }
-    }
-  });
-});
-
-addFontMethod.addEventListener("change", function () {
-  addFontURLInput.style.display = this.value === "fontURL" ? "inline" : "none";
-});
-
-styleFontSize.addEventListener("change", function () {
-  changeFontSize(getEl(), +this.value);
-});
-
-styleFontPlus.addEventListener("click", function () {
-  const size = +getEl().attr("data-size") + 1;
-  changeFontSize(getEl(), Math.min(size, 999));
-});
-
-styleFontMinus.addEventListener("click", function () {
-  const size = +getEl().attr("data-size") - 1;
-  changeFontSize(getEl(), Math.max(size, 1));
-});
 
 function changeFontSize(el, size) {
   styleFontSize.value = size;
@@ -605,20 +281,6 @@ function changeFontSize(el, size) {
   if (styleElementSelect.value === "legend") redrawLegend();
 }
 
-styleRadiusInput.addEventListener("change", function () {
-  changeRadius(+this.value);
-});
-
-styleRadiusPlus.addEventListener("click", function () {
-  const size = Math.max(rn(getEl().attr("size") * 1.1, 2), 0.2);
-  changeRadius(size);
-});
-
-styleRadiusMinus.addEventListener("click", function () {
-  const size = Math.max(rn(getEl().attr("size") * 0.9, 2), 0.2);
-  changeRadius(size);
-});
-
 function changeRadius(size, group) {
   const el = group ? burgIcons.select("#" + group) : getEl();
   const g = el.attr("id");
@@ -635,20 +297,6 @@ function changeRadius(size, group) {
     });
   changeIconSize(size * 2, g); // change also anchor icons
 }
-
-styleIconSizeInput.addEventListener("change", function () {
-  changeIconSize(+this.value);
-});
-
-styleIconSizePlus.addEventListener("click", function () {
-  const size = Math.max(rn(getEl().attr("size") * 1.1, 2), 0.2);
-  changeIconSize(size);
-});
-
-styleIconSizeMinus.addEventListener("click", function () {
-  const size = Math.max(rn(getEl().attr("size") * 0.9, 2), 0.2);
-  changeIconSize(size);
-});
 
 function changeIconSize(size, group) {
   const el = group ? anchors.select("#" + group) : getEl();
@@ -669,50 +317,6 @@ function changeIconSize(size, group) {
   });
   styleIconSizeInput.value = size;
 }
-
-styleStatesBodyOpacity.addEventListener("input", function () {
-  styleStatesBodyOpacityOutput.value = this.value;
-  statesBody.attr("opacity", this.value);
-});
-
-styleStatesBodyFilter.addEventListener("change", function () {
-  statesBody.attr("filter", this.value);
-});
-
-styleStatesHaloWidth.addEventListener("input", function () {
-  styleStatesHaloWidthOutput.value = this.value;
-  statesHalo.attr("data-width", this.value).attr("stroke-width", this.value);
-});
-
-styleStatesHaloOpacity.addEventListener("input", function () {
-  styleStatesHaloOpacityOutput.value = this.value;
-  statesHalo.attr("opacity", this.value);
-});
-
-styleStatesHaloBlur.addEventListener("input", function () {
-  styleStatesHaloBlurOutput.value = this.value;
-  const blur = +this.value > 0 ? `blur(${this.value}px)` : null;
-  statesHalo.attr("filter", blur);
-});
-
-styleArmiesFillOpacity.addEventListener("input", function () {
-  armies.attr("fill-opacity", this.value);
-  styleArmiesFillOpacityOutput.value = this.value;
-});
-
-styleArmiesSize.addEventListener("input", function () {
-  armies.attr("box-size", this.value).attr("font-size", this.value * 2);
-  styleArmiesSizeOutput.value = this.value;
-  armies.selectAll("g").remove(); // clear armies layer
-  pack.states.forEach(s => {
-    if (!s.i || s.removed || !s.military.length) return;
-    Military.drawRegiments(s.military, s.i);
-  });
-});
-
-emblemsStateSizeInput.addEventListener("change", drawEmblems);
-emblemsProvinceSizeInput.addEventListener("change", drawEmblems);
-emblemsBurgSizeInput.addEventListener("change", drawEmblems);
 
 // request a URL to image to be used as a texture
 function textureProvideURL() {
@@ -797,17 +401,4 @@ function updateElements() {
   oceanLayers.selectAll("path").remove();
   OceanLayers();
   invokeActiveZooming();
-}
-
-// GLOBAL FILTERS
-mapFilters.addEventListener("click", applyMapFilter);
-function applyMapFilter(event) {
-  if (event.target.tagName !== "BUTTON") return;
-  const button = event.target;
-  svg.attr("data-filter", null).attr("filter", null);
-  if (button.classList.contains("pressed")) return button.classList.remove("pressed");
-
-  mapFilters.querySelectorAll(".pressed").forEach(button => button.classList.remove("pressed"));
-  button.classList.add("pressed");
-  svg.attr("data-filter", button.id).attr("filter", "url(#filter-" + button.id + ")");
 }

@@ -2,10 +2,10 @@
 function createRiver() {
   if (customization) return;
   closeDialogs();
-  if (!layerIsOn("toggleRivers")) toggleRivers();
+  if (!layerData.get("RiversLayer").isOn) toggleRivers();
 
-  document.getElementById("toggleCells").dataset.forced = +!layerIsOn("toggleCells");
-  if (!layerIsOn("toggleCells")) toggleCells();
+  document.getElementById("toggleCells").dataset.forced = +!layerData.get("CellsLayer").isOn;
+  if (!layerData.get("CellsLayer").isOn) toggleCells();
 
   tip("Click to add river point, click again to remove", true);
   debug.append("g").attr("id", "controlCells");
@@ -118,6 +118,6 @@ function createRiver() {
 
     const forced = +document.getElementById("toggleCells").dataset.forced;
     document.getElementById("toggleCells").dataset.forced = 0;
-    if (forced && layerIsOn("toggleCells")) toggleCells();
+    if (forced && layerData.get("CellsLayer").isOn) toggleCells();
   }
 }

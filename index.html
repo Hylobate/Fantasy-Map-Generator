@@ -109,7 +109,6 @@
     </style>
 
     <link rel="preload" href="index.css?v=1.89.00" as="style" onload="this.onload=null; this.rel='stylesheet'" />
-    <link rel="preload" href="icons.css" as="style" onload="this.onload=null; this.rel='stylesheet'" />
     <link rel="preload" href="libs/jquery-ui.css" as="style" onload="this.onload=null; this.rel='stylesheet'" />
   </head>
   <body>
@@ -323,7 +322,6 @@
           </mask>
           <g id="textPaths"></g>
           <g id="statePaths"></g>
-          <g id="defs-emblems"></g>
         </g>
 
         <pattern id="oceanic" width="100" height="100" patternUnits="userSpaceOnUse">
@@ -350,7 +348,7 @@
       </div>
     </div>
 
-    <div id="optionsContainer" style="opacity: 0">
+    <!-- <div id="optionsContainer" style="opacity: 0">
       <div id="collapsible">
         <button
           id="optionsTrigger"
@@ -428,7 +426,6 @@
             <option value="physical">Physical map</option>
             <option value="poi">Places of interest</option>
             <option value="military">Military map</option>
-            <option value="emblems">Emblems</option>
             <option value="landmass">Pure landmass</option>
             <option hidden value="custom">Custom (not saved)</option>
           </select>
@@ -631,15 +628,6 @@
               Precipit<u>a</u>tion
             </li>
             <li
-              id="toggleEmblems"
-              data-tip="Emblems: click to toggle, drag to raise or lower the layer. Ctrl + click to edit layer style"
-              data-shortcut="Y"
-              class="buttonoff"
-              onclick="toggleEmblems(event)"
-            >
-              Emblems
-            </li>
-            <li
               id="toggleLabels"
               data-tip="Labels: click to toggle, drag to raise or lower the layer. Ctrl + click to edit layer style"
               data-shortcut="L"
@@ -750,7 +738,6 @@
             <option value="coastline">Coastline</option>
             <option value="coordinates">Coordinates</option>
             <option value="cults">Cultures</option>
-            <option value="emblems">Emblems</option>
             <option value="fogging">Fogging</option>
             <option value="gridOverlay">Grid</option>
             <option value="terrs">Heightmap</option>
@@ -1145,16 +1132,6 @@
               </tr>
             </tbody>
 
-            <tbody id="styleFont">
-              <tr data-tip="Select font">
-                <td>Font</td>
-                <td>
-                  <select id="styleSelectFont"></select>
-                  <button id="styleFontAdd" data-tip="Add a font" class="icon-plus sideButton"></button>
-                </td>
-              </tr>
-            </tbody>
-
             <tbody id="styleSize">
               <tr data-tip="Set font size">
                 <td>Font size</td>
@@ -1327,60 +1304,6 @@
                 <td>
                   <input id="styleArmiesSize" type="range" min="1" max="10" step=".1" value="3" />
                   <output id="styleArmiesSizeOutput">3</output>
-                </td>
-              </tr>
-            </tbody>
-
-            <tbody id="styleEmblems">
-              <tr data-tip="Set state emblems size multiplier">
-                <td>State Size</td>
-                <td>
-                  <input
-                    id="emblemsStateSizeInput"
-                    data-stored="emblemsStateSize"
-                    type="number"
-                    min="0"
-                    max="5"
-                    step=".02"
-                    value="1"
-                  />
-                </td>
-              </tr>
-
-              <tr data-tip="Set province emblems size multiplier">
-                <td>Province Size</td>
-                <td>
-                  <input
-                    id="emblemsProvinceSizeInput"
-                    data-stored="emblemsProvinceSize"
-                    type="number"
-                    min="0"
-                    max="5"
-                    step=".02"
-                    value="1"
-                  />
-                </td>
-              </tr>
-
-              <tr data-tip="Set burg emblems size multiplier">
-                <td>Burg Size</td>
-                <td>
-                  <input
-                    id="emblemsBurgSizeInput"
-                    data-stored="emblemsBurgSize"
-                    type="number"
-                    min="0"
-                    max="5"
-                    step=".02"
-                    value="1"
-                  />
-                </td>
-              </tr>
-
-              <tr data-tip="Allow system to hide emblem groups if their size in too small or too big on that scale">
-                <td colspan="2">
-                  <input id="hideEmblems" class="checkbox" type="checkbox" onchange="invokeActiveZooming()" checked />
-                  <label for="hideEmblems" class="checkbox-label">Toggle visibility automatically</label>
                 </td>
               </tr>
             </tbody>
@@ -1763,83 +1686,6 @@
               </td>
             </tr>
 
-            <tr data-tip="Select emblem shape. Can be changed indivudually in Emblem editor">
-              <td>
-                <i data-locked="0" id="lock_emblemShape" class="icon-lock"></i>
-              </td>
-              <td>Emblem shape</td>
-              <td>
-                <select id="emblemShape" data-stored="emblemShape">
-                  <optgroup label="Diversiform">
-                    <option value="culture" selected>Culture-specific</option>
-                    <option value="random">Culture-random</option>
-                    <option value="state">State-specific</option>
-                  </optgroup>
-                  <optgroup label="Basic">
-                    <option value="heater">Heater</option>
-                    <option value="spanish">Spanish</option>
-                    <option value="french">French</option>
-                  </optgroup>
-                  <optgroup label="Regional">
-                    <option value="horsehead">Horsehead</option>
-                    <option value="horsehead2">Horsehead Edgy</option>
-                    <option value="polish">Polish</option>
-                    <option value="hessen">Hessen</option>
-                    <option value="swiss">Swiss</option>
-                  </optgroup>
-                  <optgroup label="Historical">
-                    <option value="boeotian">Boeotian</option>
-                    <option value="roman">Roman</option>
-                    <option value="kite">Kite</option>
-                    <option value="oldFrench">Old French</option>
-                    <option value="renaissance">Renaissance</option>
-                    <option value="baroque">Baroque</option>
-                  </optgroup>
-                  <optgroup label="Specific">
-                    <option value="targe">Targe</option>
-                    <option value="targe2">Targe2</option>
-                    <option value="pavise">Pavise</option>
-                    <option value="wedged">Wedged</option>
-                  </optgroup>
-                  <optgroup label="Banner">
-                    <option value="flag">Flag</option>
-                    <option value="pennon">Pennon</option>
-                    <option value="guidon">Guidon</option>
-                    <option value="banner">Banner</option>
-                    <option value="dovetail">Dovetail</option>
-                    <option value="gonfalon">Gonfalon</option>
-                    <option value="pennant">Pennant</option>
-                  </optgroup>
-                  <optgroup label="Simple">
-                    <option value="round">Round</option>
-                    <option value="oval">Oval</option>
-                    <option value="vesicaPiscis">Vesica Piscis</option>
-                    <option value="square">Square</option>
-                    <option value="diamond">Diamond</option>
-                  </optgroup>
-                  <optgroup label="Fantasy">
-                    <option value="fantasy1">Fantasy1</option>
-                    <option value="fantasy2">Fantasy2</option>
-                    <option value="fantasy3">Fantasy3</option>
-                    <option value="fantasy4">Fantasy4</option>
-                    <option value="fantasy5">Fantasy5</option>
-                  </optgroup>
-                  <optgroup label="Middle Earth">
-                    <option value="noldor">Noldor</option>
-                    <option value="gondor">Gondor</option>
-                    <option value="easterling">Easterling</option>
-                    <option value="erebor">Erebor</option>
-                    <option value="ironHills">Iron Hills</option>
-                    <option value="urukHai">UrukHai</option>
-                    <option value="moriaOrc">Moria Orc</option>
-                  </optgroup>
-                </select>
-              </td>
-              <td>
-                <svg class="emblemShapePreview" viewBox="0 0 200 210"><path id="emblemShapeImage" /></svg>
-              </td>
-            </tr>
-
             <tr data-tip="Set minimum and maximum possible zoom level">
               <td>
                 <i data-tip="Restore default zoom extent: [1, 20]" id="zoomExtentDefault" class="icon-ccw"></i>
@@ -1890,7 +1736,7 @@
               <td></td>
             </tr>
 
-            <!-- <tr data-tip="Select language (not all languages are fully supported). Reload the page to apply">
+           <tr data-tip="Select language (not all languages are fully supported). Reload the page to apply">
             <td></td>
             <td>Language</td>
             <td>
@@ -1900,7 +1746,7 @@
               </select>
             </td>
             <td></td>
-          </tr> -->
+          </tr>
           </table>
 
           <div>
@@ -1956,9 +1802,6 @@
             <button id="editZonesButton" data-tip="Click to open Zones Editor" data-shortcut="Shift + Z">Zones</button>
             <button id="editReligions" data-tip="Click to open Religions Editor" data-shortcut="Shift + R">
               Religions
-            </button>
-            <button id="editEmblemButton" data-tip="Click to open Emblem Editor" data-shortcut="Shift + Y">
-              Emblems
             </button>
             <button id="editUnitsButton" data-tip="Click to open Units Editor" data-shortcut="Shift + Q">Units</button>
             <button id="editNotesButton" data-tip="Click to open Notes Editor" data-shortcut="Shift + O">Notes</button>
@@ -2017,7 +1860,7 @@
             </button>
             <button
               id="regenerateStates"
-              data-tip="Click to select new capitals and regenerate non-locked states. Emblems and military forces will be regenerated as well, burgs will remain as they are"
+              data-tip="Click to select new capitals and regenerate non-locked states. Military forces will be regenerated as well, burgs will remain as they are"
             >
               States
             </button>
@@ -2033,7 +1876,6 @@
             >
               Burgs
             </button>
-            <button id="regenerateEmblems" data-tip="Click to regenerate all emblems">Emblems</button>
             <button id="regenerateReligions" data-tip="Click to regenerate non-locked religions">Religions</button>
             <button id="regenerateCultures" data-tip="Click to regenerate non-locked cultures">Cultures</button>
             <button
@@ -2309,7 +2151,7 @@
           <button id="zoomReset" data-tip="Reset map zoom" data-shortcut="0 (zero)">Reset Zoom</button>
         </div>
       </div>
-    </div>
+    </div> -->
 
     <div id="exitCustomization">
       <div data-tip="Drag to move the pane">
@@ -2322,7 +2164,7 @@
     <div id="dialogs">
       <div id="worldConfigurator" class="dialog stable" style="display: none">
         <div>
-          <div id="worldControls">
+          <!-- <div id="worldControls">
             <div>
               <i data-locked="0" id="lock_temperatureEquator" class="icon-lock-open"></i>
               <label data-tip="Set temperature at equator">
@@ -2397,7 +2239,7 @@
               ></span>
             </div>
             <div data-tip="Map coordinates on globe"><i>Coords:</i> <span id="mapCoordinates"></span></div>
-          </div>
+          </div> -->
 
           <svg id="globe" width="22em" height="22em" viewBox="-20 -25 240 240">
             <defs>
@@ -3278,7 +3120,6 @@
             ></button>
           </div>
 
-          <button id="burgEditEmblem" data-tip="Edit emblem" class="icon-shield-alt"></button>
           <button id="burgToggleMFCGMap" data-tip="Toggle MFCG map" class="icon-map"></button>
           <button id="burgRelocate" data-tip="Relocate burg" class="icon-target"></button>
           <button id="burglLegend" data-tip="Edit free text notes (legend) for this burg" class="icon-edit"></button>
@@ -3391,13 +3232,6 @@
               class="icon-ccw pointer"
             ></i>
           </div>
-
-          <div data-tip="Regiment emblem. Paste any Unicode symbol or select from the predefined list">
-            <div class="label italic">Emblem:</div>
-            <input id="regimentEmblem" style="width: 5em" />
-            <button id="regimentEmblemSelect" style="padding: 0; width: 4.5em">select</button>
-          </div>
-
           <div id="regimentComposition" class="table"></div>
         </div>
 
@@ -4779,174 +4613,6 @@
         </div>
       </div>
 
-      <div id="emblemEditor" class="dialog stable" style="display: none">
-        <svg viewBox="0 0 200 200"><use id="emblemImage"></use></svg>
-        <div id="emblemBody">
-          <div>
-            <b id="emblemArmiger"></b>
-          </div>
-          <hr />
-          <div data-tip="Select state">
-            <div class="label">State:</div>
-            <select id="emblemStates"></select>
-          </div>
-          <div data-tip="Select province in state">
-            <div class="label">Province:</div>
-            <select id="emblemProvinces"></select>
-          </div>
-          <div data-tip="Select burg in province or state">
-            <div class="label">Burg:</div>
-            <select id="emblemBurgs"></select>
-          </div>
-          <hr />
-          <div data-tip="Select shape of the emblem">
-            <div class="label">Shape:</div>
-            <select id="emblemShapeSelector">
-              <optgroup label="Basic">
-                <option value="heater">Heater</option>
-                <option value="spanish">Spanish</option>
-                <option value="french">French</option>
-              </optgroup>
-              <optgroup label="Regional">
-                <option value="horsehead">Horsehead</option>
-                <option value="horsehead2">Horsehead Edgy</option>
-                <option value="polish">Polish</option>
-                <option value="hessen">Hessen</option>
-                <option value="swiss">Swiss</option>
-              </optgroup>
-              <optgroup label="Historical">
-                <option value="boeotian">Boeotian</option>
-                <option value="roman">Roman</option>
-                <option value="kite">Kite</option>
-                <option value="oldFrench">Old French</option>
-                <option value="renaissance">Renaissance</option>
-                <option value="baroque">Baroque</option>
-              </optgroup>
-              <optgroup label="Specific">
-                <option value="targe">Targe</option>
-                <option value="targe2">Targe2</option>
-                <option value="pavise">Pavise</option>
-                <option value="wedged">Wedged</option>
-              </optgroup>
-              <optgroup label="Banner">
-                <option value="flag">Flag</option>
-                <option value="pennon">Pennon</option>
-                <option value="guidon">Guidon</option>
-                <option value="banner">Banner</option>
-                <option value="dovetail">Dovetail</option>
-                <option value="gonfalon">Gonfalon</option>
-                <option value="pennant">Pennant</option>
-              </optgroup>
-              <optgroup label="Simple">
-                <option value="round">Round</option>
-                <option value="oval">Oval</option>
-                <option value="vesicaPiscis">Vesica Piscis</option>
-                <option value="square">Square</option>
-                <option value="diamond">Diamond</option>
-              </optgroup>
-              <optgroup label="Fantasy">
-                <option value="fantasy1">Fantasy1</option>
-                <option value="fantasy2">Fantasy2</option>
-                <option value="fantasy3">Fantasy3</option>
-                <option value="fantasy4">Fantasy4</option>
-                <option value="fantasy5">Fantasy5</option>
-              </optgroup>
-              <optgroup label="Middle Earth">
-                <option value="noldor">Noldor</option>
-                <option value="gondor">Gondor</option>
-                <option value="easterling">Easterling</option>
-                <option value="erebor">Erebor</option>
-                <option value="ironHills">Iron Hills</option>
-                <option value="urukHai">UrukHai</option>
-                <option value="moriaOrc">Moria Orc</option>
-              </optgroup>
-            </select>
-          </div>
-
-          <div
-            data-tip="Set size of particular Emblem. To hide set to 0. To change the entire category go to Menu ⭢ Style ⭢ Emblems"
-          >
-            <div class="label" style="width: 2.8em">Size:</div>
-            <input id="emblemSizeSlider" type="range" min="0" max="5" step=".1" style="width: 7em" />
-            <input id="emblemSizeNumber" type="number" min="0" max="5" step=".1" />
-          </div>
-        </div>
-        <div id="emblemsBottom">
-          <button id="emblemsRegenerate" data-tip="Regenerate emblem" class="icon-shuffle"></button>
-          <button
-            id="emblemsArmoria"
-            data-tip="Edit the emblem in Armoria - dedicated heraldry editor. Download emblem and upload it back map the generator"
-            class="icon-brush"
-          ></button>
-          <button
-            id="emblemsDownload"
-            data-tip="Set size, select file format and download emblem image"
-            class="icon-download"
-          ></button>
-          <button
-            id="emblemsUpload"
-            data-tip="Upload png, jpg or svg image from Armoria or other sources as emblem"
-            class="icon-upload"
-          ></button>
-          <button
-            id="emblemsGallery"
-            data-tip="Download emblems gallery as html document (open in browser; downloading takes some time)"
-            class="icon-layer-group"
-          ></button>
-          <button id="emblemsFocus" data-tip="Show emblem associated area or place" class="icon-target"></button>
-        </div>
-        <div id="emblemUploadControl" class="hidden">
-          <button
-            id="emblemsUploadImage"
-            data-tip="Upload SVG or PNG image from any source. Make sure background is transparent"
-          >
-            Any image
-          </button>
-          <button id="emblemsUploadSVG" data-tip="Upload prepared SVG image, e.g. SVG from Armoria">
-            Prepared SVG
-          </button>
-          <a
-            href="https://www.iloveimg.com/compress-image"
-            target="_blank"
-            data-tip="Use external tool to compress/resize raster images before upload"
-            >Comperess raster</a
-          >
-          <span> | </span>
-          <a
-            href="https://jakearchibald.github.io/svgomg"
-            target="_blank"
-            data-tip="Use external tool to optimize vector images before upload"
-            >Optimize vector</a
-          >
-        </div>
-        <div id="emblemDownloadControl" class="hidden">
-          <input
-            id="emblemsDownloadSize"
-            data-tip="Set image size in pixels"
-            type="number"
-            value="500"
-            step="100"
-            min="100"
-            max="10000"
-          />
-          <button
-            id="emblemsDownloadSVG"
-            data-tip="Download as SVG: scalable vector image. Best quality, can be opened in browser or Inkscape"
-          >
-            SVG
-          </button>
-          <button id="emblemsDownloadPNG" data-tip="Download as PNG: lossless raster image with transparent background">
-            PNG
-          </button>
-          <button
-            id="emblemsDownloadJPG"
-            data-tip="Download as JPG: lossy compressed raster image with solid white background"
-          >
-            JPG
-          </button>
-        </div>
-      </div>
-
       <div id="unitsEditor" class="dialog stable" style="display: none">
         <div id="unitsBody" style="margin-left: 1.1em">
           <div class="unitsHeader" style="margin-top: 0.4em">
@@ -6026,7 +5692,6 @@
       <input type="file" accept=".txt" id="legendsToLoad" />
       <input type="file" accept="image/*" id="imageToLoad" />
       <input type="file" accept="image/*" id="emblemImageToLoad" />
-      <input type="file" accept=".svg" id="emblemSVGToLoad" />
       <input type="file" accept=".txt" id="templateToLoad" />
       <input type="file" accept=".txt" id="namesbaseToLoad" />
       <input type="file" accept=".json" id="styleToLoad" />
@@ -7654,8 +7319,6 @@
           <use href="#s3" transform="scale(-1)" />
         </g>
 
-        <g id="coas"></g>
-
         <g id="gridPatterns">
           <pattern id="pattern_square" width="25" height="25" patternUnits="userSpaceOnUse" fill="none">
             <path d="M 25 0 L 0 0 0 25" />
@@ -7836,6 +7499,7 @@
     <script src="utils/stringUtils.js"></script>
     <script src="utils/languageUtils.js"></script>
     <script src="utils/unitUtils.js?v=1.87.00"></script>
+    <script src="modules/ui/options.js?v=1.88.02"></script>
 
     <script src="modules/voronoi.js"></script>
     <script src="config/heightmap-templates.js"></script>
@@ -7851,7 +7515,6 @@
     <script src="modules/religions-generator.js?v=1.89.00"></script>
     <script src="modules/military-generator.js"></script>
     <script src="modules/markers-generator.js?v=1.87.13"></script>
-    <script src="modules/coa-generator.js"></script>
     <script src="modules/submap.js?v=1.88.05"></script>
     <script src="libs/polylabel.min.js"></script>
     <script src="libs/lineclip.min.js"></script>
@@ -7862,7 +7525,6 @@
     <script src="modules/ui/stylePresets.js"></script>
 
     <script src="modules/ui/general.js?v=1.87.03"></script>
-    <script src="modules/ui/options.js?v=1.88.02"></script>
     <script src="main.js?v=1.88.02"></script>
 
     <script defer src="modules/relief-icons.js"></script>
@@ -7896,12 +7558,10 @@
     <script defer src="modules/ui/markers-overview.js"></script>
     <script defer src="modules/ui/regiment-editor.js"></script>
     <script defer src="modules/ui/battle-screen.js"></script>
-    <script defer src="modules/ui/emblems-editor.js"></script>
     <script defer src="modules/ui/markers-editor.js"></script>
     <script defer src="modules/ui/3d.js"></script>
     <script defer src="modules/ui/submap.js"></script>
     <script defer src="modules/ui/hotkeys.js?v=1.88.00"></script>
-    <script defer src="modules/coa-renderer.js?v=1.87.08"></script>
     <script defer src="libs/rgbquant.min.js"></script>
     <script defer src="libs/jquery.ui.touch-punch.min.js"></script>
 

@@ -253,11 +253,6 @@
     "filter": null,
     "mask": "url(#land)"
   },
-  "#emblems": {
-    "opacity": 0.5,
-    "stroke-width": 0.5,
-    "filter": null
-  },
   "#textureImage": {},
   "#zones": {
     "opacity": 0.6,

@@ -1,11 +1,11 @@
 // UI module stub to control map layers
 "use strict";
 
-let presets = {}; // global object
-restoreCustomPresets(); // run on-load
+let presets = getDefaultPresets(); // global object
 
 function getDefaultPresets() {
   return {
+    testing: ["toggleRoutes", "toggleRivers"],
     political: [
       "toggleBorders",
       "toggleIcons",
@@ -58,126 +58,52 @@ function getDefaultPresets() {
       "toggleScaleBar",
       "toggleStates"
     ],
-    emblems: [
-      "toggleBorders",
-      "toggleIcons",
-      "toggleIce",
-      "toggleEmblems",
-      "toggleRivers",
-      "toggleRoutes",
-      "toggleScaleBar",
-      "toggleStates"
-    ],
     landmass: ["toggleScaleBar"]
   };
 }
 
-function restoreCustomPresets() {
-  presets = getDefaultPresets();
-  const storedPresets = JSON.parse(localStorage.getItem("presets"));
-  if (!storedPresets) return;
-
-  for (const preset in storedPresets) {
-    if (presets[preset]) continue;
-    layersPreset.add(new Option(preset, preset));
-  }
-
-  presets = storedPresets;
-}
-
 // run on map generation
 function applyPreset() {
-  const preset = localStorage.getItem("preset") || document.getElementById("layersPreset").value;
+  // const preset = localStorage.getItem("preset") || layersPresetSelected;
+  const preset = layersPresetSelected;
   changePreset(preset);
 }
 
 // toggle layers on preset change
 function changePreset(preset) {
   const layers = presets[preset]; // layers to be turned on
-  document
-    .getElementById("mapLayers")
-    .querySelectorAll("li")
-    .forEach(function (e) {
-      if (layers.includes(e.id) && !layerIsOn(e.id)) e.click();
-      else if (!layers.includes(e.id) && layerIsOn(e.id)) e.click();
-    });
-  layersPreset.value = preset;
+  for (const layer of layers) {
+    window[layer]("");
+  }
   localStorage.setItem("preset", preset);
 
   const isDefault = getDefaultPresets()[preset];
-  removePresetButton.style.display = isDefault ? "none" : "inline-block";
-  savePresetButton.style.display = "none";
+
   if (document.getElementById("canvas3d")) setTimeout(ThreeD.update(), 400);
-}
-
-function savePreset() {
-  prompt("Please provide a preset name", {default: ""}, preset => {
-    presets[preset] = Array.from(document.getElementById("mapLayers").querySelectorAll("li:not(.buttonoff)"))
-      .map(node => node.id)
-      .sort();
-    layersPreset.add(new Option(preset, preset, false, true));
-    localStorage.setItem("presets", JSON.stringify(presets));
-    localStorage.setItem("preset", preset);
-    removePresetButton.style.display = "inline-block";
-    savePresetButton.style.display = "none";
-  });
-}
-
-function removePreset() {
-  const preset = layersPreset.value;
-  delete presets[preset];
-  const index = Array.from(layersPreset.options).findIndex(o => o.value === preset);
-  layersPreset.options.remove(index);
-  layersPreset.value = "custom";
-  removePresetButton.style.display = "none";
-  savePresetButton.style.display = "inline-block";
-
-  localStorage.setItem("presets", JSON.stringify(presets));
-  localStorage.removeItem("preset");
-}
-
-function getCurrentPreset() {
-  const layers = Array.from(document.getElementById("mapLayers").querySelectorAll("li:not(.buttonoff)"))
-    .map(node => node.id)
-    .sort();
-  const defaultPresets = getDefaultPresets();
-
-  for (const preset in presets) {
-    if (JSON.stringify(presets[preset]) !== JSON.stringify(layers)) continue;
-    layersPreset.value = preset;
-    removePresetButton.style.display = defaultPresets[preset] ? "none" : "inline-block";
-    savePresetButton.style.display = "none";
-    return;
-  }
-
-  layersPreset.value = "custom";
-  removePresetButton.style.display = "none";
-  savePresetButton.style.display = "inline-block";
 }
 
 // run on map regeneration
 function restoreLayers() {
-  if (layerIsOn("toggleHeight")) drawHeightmap();
-  if (layerIsOn("toggleCells")) drawCells();
-  if (layerIsOn("toggleGrid")) drawGrid();
-  if (layerIsOn("toggleCoordinates")) drawCoordinates();
-  if (layerIsOn("toggleCompass")) compass.style("display", "block");
-  if (layerIsOn("toggleTemp")) drawTemp();
-  if (layerIsOn("togglePrec")) drawPrec();
-  if (layerIsOn("togglePopulation")) drawPopulation();
-  if (layerIsOn("toggleBiomes")) drawBiomes();
-  if (layerIsOn("toggleRelief")) ReliefIcons();
-  if (layerIsOn("toggleCultures")) drawCultures();
-  if (layerIsOn("toggleProvinces")) drawProvinces();
-  if (layerIsOn("toggleReligions")) drawReligions();
-  if (layerIsOn("toggleIce")) drawIce();
-  if (layerIsOn("toggleEmblems")) drawEmblems();
-  if (layerIsOn("toggleMarkers")) drawMarkers();
+  if (layerData.get("HeightLayer").isOn) drawHeightmap();
+  if (layerData.get("CellsLayer").isOn) drawCells();
+  if (layerData.get("GridLayer").isOn) drawGrid();
+  if (layerData.get("CoordinatesLayer").isOn) drawCoordinates();
+  if (layerData.get("CompassLayer").isOn) compass.style("display", "block");
+  if (layerData.get("TempLayer").isOn) drawTemp();
+  if (layerData.get("PrecLayer").isOn) drawPrec();
+  if (layerData.get("PopulationLayer").isOn) drawPopulation();
+  if (layerData.get("BiomesLayer").isOn) drawBiomes();
+  if (layerData.get("ReliefLayer").isOn) ReliefIcons();
+  if (layerData.get("CulturesLayer").isOn) drawCultures();
+  if (layerData.get("ProvincesLayer").isOn) drawProvinces();
+  if (layerData.get("ReligionsLayer").isOn) drawReligions();
+  if (layerData.get("IceLayer").isOn) drawIce();
+  if (layerData.get("MarkersLayer").isOn) drawMarkers();
 
   // some layers are rendered each time, remove them if they are not on
-  if (!layerIsOn("toggleBorders")) borders.selectAll("path").remove();
-  if (!layerIsOn("toggleStates")) regions.selectAll("path").remove();
-  if (!layerIsOn("toggleRivers")) rivers.selectAll("*").remove();
+  if (!layerData.get("BordersLayer").isOn) borders.selectAll("path").remove();
+  if (!layerData.get("StatesLayer").isOn) regions.selectAll("path").remove();
+  if (!layerData.get("RiversLayer").isOn) rivers.selectAll("*").remove();
 }
 
 function toggleHeight(event) {
@@ -187,7 +113,6 @@ function toggleHeight(event) {
   }
 
   if (!terrs.selectAll("*").size()) {
-    turnButtonOn("toggleHeight");
     drawHeightmap();
     if (event && isCtrlClick(event)) editStyle("terrs");
   } else {
@@ -195,7 +120,6 @@ function toggleHeight(event) {
       editStyle("terrs");
       return;
     }
-    turnButtonOff("toggleHeight");
     terrs.selectAll("*").remove();
   }
 }
@@ -311,7 +235,6 @@ function getColor(value, scheme = getColorScheme()) {
 
 function toggleTemp(event) {
   if (!temperature.selectAll("*").size()) {
-    turnButtonOn("toggleTemp");
     drawTemp();
     if (event && isCtrlClick(event)) editStyle("temperature");
   } else {
@@ -319,7 +242,6 @@ function toggleTemp(event) {
       editStyle("temperature");
       return;
     }
-    turnButtonOff("toggleTemp");
     temperature.selectAll("*").remove();
   }
 }
@@ -442,7 +364,6 @@ function drawTemp() {
 
 function toggleBiomes(event) {
   if (!biomes.selectAll("path").size()) {
-    turnButtonOn("toggleBiomes");
     drawBiomes();
     if (event && isCtrlClick(event)) editStyle("biomes");
   } else {
@@ -451,7 +372,6 @@ function toggleBiomes(event) {
       return;
     }
     biomes.selectAll("path").remove();
-    turnButtonOff("toggleBiomes");
   }
 }
 
@@ -515,7 +435,6 @@ function drawBiomes() {
 
 function togglePrec(event) {
   if (!prec.selectAll("circle").size()) {
-    turnButtonOn("togglePrec");
     drawPrec();
     if (event && isCtrlClick(event)) editStyle("prec");
   } else {
@@ -523,7 +442,6 @@ function togglePrec(event) {
       editStyle("prec");
       return;
     }
-    turnButtonOff("togglePrec");
     const hide = d3.transition().duration(1000).ease(d3.easeSinIn);
     prec.selectAll("text").attr("opacity", 1).transition(hide).attr("opacity", 0);
     prec.selectAll("circle").transition(hide).attr("r", 0).remove();
@@ -557,7 +475,6 @@ function drawPrec() {
 
 function togglePopulation(event) {
   if (!population.selectAll("line").size()) {
-    turnButtonOn("togglePopulation");
     drawPopulation();
     if (event && isCtrlClick(event)) editStyle("population");
   } else {
@@ -565,7 +482,6 @@ function togglePopulation(event) {
       editStyle("population");
       return;
     }
-    turnButtonOff("togglePopulation");
     const isD3data = population.select("line").datum();
     if (!isD3data) {
       // just remove
@@ -632,7 +548,6 @@ function drawPopulation(event) {
 
 function toggleCells(event) {
   if (!cells.selectAll("path").size()) {
-    turnButtonOn("toggleCells");
     drawCells();
     if (event && isCtrlClick(event)) editStyle("cells");
   } else {
@@ -641,7 +556,6 @@ function toggleCells(event) {
       return;
     }
     cells.selectAll("path").remove();
-    turnButtonOff("toggleCells");
   }
 }
 
@@ -655,8 +569,7 @@ function drawCells() {
 }
 
 function toggleIce(event) {
-  if (!layerIsOn("toggleIce")) {
-    turnButtonOn("toggleIce");
+  if (!layerData.get("IceLayer").isOn) {
     $("#ice").fadeIn();
     if (!ice.selectAll("*").size()) drawIce();
     if (event && isCtrlClick(event)) editStyle("ice");
@@ -666,7 +579,6 @@ function toggleIce(event) {
       return;
     }
     $("#ice").fadeOut();
-    turnButtonOff("toggleIce");
   }
 }
 
@@ -747,7 +659,6 @@ function toggleCultures(event) {
   const cultures = pack.cultures.filter(c => c.i && !c.removed);
   const empty = !cults.selectAll("path").size();
   if (empty && cultures.length) {
-    turnButtonOn("toggleCultures");
     drawCultures();
     if (event && isCtrlClick(event)) editStyle("cults");
   } else {
@@ -756,7 +667,6 @@ function toggleCultures(event) {
       return;
     }
     cults.selectAll("path").remove();
-    turnButtonOff("toggleCultures");
   }
 }
 
@@ -821,7 +731,6 @@ function drawCultures() {
 function toggleReligions(event) {
   const religions = pack.religions.filter(r => r.i && !r.removed);
   if (!relig.selectAll("path").size() && religions.length) {
-    turnButtonOn("toggleReligions");
     drawReligions();
     if (event && isCtrlClick(event)) editStyle("relig");
   } else {
@@ -830,7 +739,6 @@ function toggleReligions(event) {
       return;
     }
     relig.selectAll("path").remove();
-    turnButtonOff("toggleReligions");
   }
 }
 
@@ -931,8 +839,7 @@ function drawReligions() {
 }
 
 function toggleStates(event) {
-  if (!layerIsOn("toggleStates")) {
-    turnButtonOn("toggleStates");
+  if (!layerData.get("StatesLayer").isOn) {
     regions.style("display", null);
     drawStates();
     if (event && isCtrlClick(event)) editStyle("regions");
@@ -942,7 +849,6 @@ function toggleStates(event) {
       return;
     }
     regions.style("display", "none").selectAll("path").remove();
-    turnButtonOff("toggleStates");
   }
 }
 
@@ -1095,8 +1001,7 @@ function drawStates() {
 }
 
 function toggleBorders(event) {
-  if (!layerIsOn("toggleBorders")) {
-    turnButtonOn("toggleBorders");
+  if (!layerData.get("BordersLayer").isOn) {
     drawBorders();
     if (event && isCtrlClick(event)) editStyle("borders");
   } else {
@@ -1104,7 +1009,6 @@ function toggleBorders(event) {
       editStyle("borders");
       return;
     }
-    turnButtonOff("toggleBorders");
     borders.selectAll("path").remove();
   }
 }
@@ -1218,8 +1122,7 @@ function drawBorders() {
 }
 
 function toggleProvinces(event) {
-  if (!layerIsOn("toggleProvinces")) {
-    turnButtonOn("toggleProvinces");
+  if (!layerData.get("ProvincesLayer").isOn) {
     drawProvinces();
     if (event && isCtrlClick(event)) editStyle("provs");
   } else {
@@ -1228,7 +1131,6 @@ function toggleProvinces(event) {
       return;
     }
     provs.selectAll("*").remove();
-    turnButtonOff("toggleProvinces");
   }
 }
 
@@ -1357,8 +1259,7 @@ function getProvincesVertices() {
 }
 
 function toggleGrid(event) {
-  if (!gridOverlay.selectAll("*").size()) {
-    turnButtonOn("toggleGrid");
+  if(layerData.get("GridLayer").isOn){
     drawGrid();
     calculateFriendlyGridSize();
 
@@ -1368,9 +1269,9 @@ function toggleGrid(event) {
       editStyle("gridOverlay");
       return;
     }
-    turnButtonOff("toggleGrid");
     gridOverlay.selectAll("*").remove();
   }
+  toggleLayer("GridLayer");
 }
 
 function drawGrid() {
@@ -1403,8 +1304,7 @@ function drawGrid() {
 }
 
 function toggleCoordinates(event) {
-  if (!coordinates.selectAll("*").size()) {
-    turnButtonOn("toggleCoordinates");
+  if(layerData.get("CoordinateLayer").isOn){
     drawCoordinates();
     if (event && isCtrlClick(event)) editStyle("coordinates");
   } else {
@@ -1412,13 +1312,13 @@ function toggleCoordinates(event) {
       editStyle("coordinates");
       return;
     }
-    turnButtonOff("toggleCoordinates");
     coordinates.selectAll("*").remove();
   }
+  toggleLayer("CoordinateLayer");
 }
 
 function drawCoordinates() {
-  if (!layerIsOn("toggleCoordinates")) return;
+  if (!layerData.get("CoordinatesLayer").isOn) return;
   coordinates.selectAll("*").remove(); // remove every time
   const steps = [0.5, 1, 2, 5, 10, 15, 30]; // possible steps
   const goal = mapCoordinates.lonT / scale / 10;
@@ -1482,8 +1382,7 @@ function getViewPoint(x, y) {
 }
 
 function toggleCompass(event) {
-  if (!layerIsOn("toggleCompass")) {
-    turnButtonOn("toggleCompass");
+  if (!layerData.get("CompassLayer").isOn) {
     $("#compass").fadeIn();
     if (!compass.selectAll("*").size()) {
       compass.append("use").attr("xlink:href", "#rose");
@@ -1496,13 +1395,12 @@ function toggleCompass(event) {
       return;
     }
     $("#compass").fadeOut();
-    turnButtonOff("toggleCompass");
   }
+  toggleLayer("CompassLayer");
 }
 
 function toggleRelief(event) {
-  if (!layerIsOn("toggleRelief")) {
-    turnButtonOn("toggleRelief");
+  if (!layerData.get("ReliefLayer").isOn) {
     if (!terrain.selectAll("*").size()) ReliefIcons();
     $("#terrain").fadeIn();
     if (event && isCtrlClick(event)) editStyle("terrain");
@@ -1512,13 +1410,12 @@ function toggleRelief(event) {
       return;
     }
     $("#terrain").fadeOut();
-    turnButtonOff("toggleRelief");
   }
+  toggleLayer("ReliefLayer");
 }
 
 function toggleTexture(event) {
-  if (!layerIsOn("toggleTexture")) {
-    turnButtonOn("toggleTexture");
+  if (!layerData.get("TextureLayer").isOn) {
     // append default texture image selected by default. Don't append on load to not harm performance
     if (!texture.selectAll("*").size()) {
       const x = +styleTextureShiftX.value;
@@ -1539,20 +1436,19 @@ function toggleTexture(event) {
   } else {
     if (event && isCtrlClick(event)) return editStyle("texture");
     $("#texture").fadeOut();
-    turnButtonOff("toggleTexture");
   }
+  toggleLayer("TextureLayer");
 }
 
 function toggleRivers(event) {
-  if (!layerIsOn("toggleRivers")) {
-    turnButtonOn("toggleRivers");
+  if (!layerData.get("RiversLayer").isOn) {
     drawRivers();
     if (event && isCtrlClick(event)) editStyle("rivers");
   } else {
     if (event && isCtrlClick(event)) return editStyle("rivers");
     rivers.selectAll("*").remove();
-    turnButtonOff("toggleRivers");
   }
+  toggleLayer("RiversLayer");
 }
 
 function drawRivers() {
@@ -1582,8 +1478,7 @@ function drawRivers() {
 }
 
 function toggleRoutes(event) {
-  if (!layerIsOn("toggleRoutes")) {
-    turnButtonOn("toggleRoutes");
+  if (!layerData.get("RoutesLayer").isOn) {
     $("#routes").fadeIn();
     if (event && isCtrlClick(event)) editStyle("routes");
   } else {
@@ -1592,13 +1487,12 @@ function toggleRoutes(event) {
       return;
     }
     $("#routes").fadeOut();
-    turnButtonOff("toggleRoutes");
   }
+  toggleLayer("RoutesLayer");
 }
 
 function toggleMilitary() {
-  if (!layerIsOn("toggleMilitary")) {
-    turnButtonOn("toggleMilitary");
+  if (!layerData.get("MilitaryLayer").isOn) {
     $("#armies").fadeIn();
     if (event && isCtrlClick(event)) editStyle("armies");
   } else {
@@ -1607,20 +1501,19 @@ function toggleMilitary() {
       return;
     }
     $("#armies").fadeOut();
-    turnButtonOff("toggleMilitary");
   }
+  toggleLayer("MilitaryLayer");
 }
 
 function toggleMarkers(event) {
-  if (!layerIsOn("toggleMarkers")) {
-    turnButtonOn("toggleMarkers");
+  if (!layerData.get("MarkersLayer").isOn) {
     drawMarkers();
     if (event && isCtrlClick(event)) editStyle("markers");
   } else {
     if (event && isCtrlClick(event)) return editStyle("markers");
     markers.selectAll("*").remove();
-    turnButtonOff("toggleMarkers");
   }
+  toggleLayer("MarkersLayer");
 }
 
 function drawMarkers() {
@@ -1667,8 +1560,7 @@ function drawMarker(marker, rescale = 1) {
 }
 
 function toggleLabels(event) {
-  if (!layerIsOn("toggleLabels")) {
-    turnButtonOn("toggleLabels");
+  if (!layerData.get("LabelsLayer").isOn) {
     labels.style("display", null);
     invokeActiveZooming();
     if (event && isCtrlClick(event)) editStyle("labels");
@@ -1677,14 +1569,13 @@ function toggleLabels(event) {
       editStyle("labels");
       return;
     }
-    turnButtonOff("toggleLabels");
     labels.style("display", "none");
   }
+  toggleLayer("LabelsLayer");
 }
 
 function toggleIcons(event) {
-  if (!layerIsOn("toggleIcons")) {
-    turnButtonOn("toggleIcons");
+  if (!layerData.get("IconsLayer").isOn) {
     $("#icons").fadeIn();
     if (event && isCtrlClick(event)) editStyle("burgIcons");
   } else {
@@ -1692,14 +1583,13 @@ function toggleIcons(event) {
       editStyle("burgIcons");
       return;
     }
-    turnButtonOff("toggleIcons");
     $("#icons").fadeOut();
   }
+  toggleLayer("IconsLayer");
 }
 
 function toggleRulers(event) {
-  if (!layerIsOn("toggleRulers")) {
-    turnButtonOn("toggleRulers");
+  if (!layerData.get("RulersLayer").isOn) {
     if (event && isCtrlClick(event)) editStyle("ruler");
     rulers.draw();
     ruler.style("display", null);
@@ -1708,15 +1598,14 @@ function toggleRulers(event) {
       editStyle("ruler");
       return;
     }
-    turnButtonOff("toggleRulers");
     ruler.selectAll("*").remove();
     ruler.style("display", "none");
   }
+  toggleLayer("RulersLayer");
 }
 
 function toggleScaleBar(event) {
-  if (!layerIsOn("toggleScaleBar")) {
-    turnButtonOn("toggleScaleBar");
+  if (!layerData.get("ScaleBarLayer").isOn) {
     $("#scaleBar").fadeIn();
     if (event && isCtrlClick(event)) editUnits();
   } else {
@@ -1725,13 +1614,11 @@ function toggleScaleBar(event) {
       return;
     }
     $("#scaleBar").fadeOut();
-    turnButtonOff("toggleScaleBar");
   }
 }
 
 function toggleZones(event) {
-  if (!layerIsOn("toggleZones")) {
-    turnButtonOn("toggleZones");
+  if (!layerData.get("ZonesLayer").isOn) {
     $("#zones").fadeIn();
     if (event && isCtrlClick(event)) editStyle("zones");
   } else {
@@ -1739,151 +1626,17 @@ function toggleZones(event) {
       editStyle("zones");
       return;
     }
-    turnButtonOff("toggleZones");
     $("#zones").fadeOut();
   }
-}
-
-function toggleEmblems(event) {
-  if (!layerIsOn("toggleEmblems")) {
-    turnButtonOn("toggleEmblems");
-    if (!emblems.selectAll("use").size()) drawEmblems();
-    $("#emblems").fadeIn();
-    if (event && isCtrlClick(event)) editStyle("emblems");
-  } else {
-    if (event && isCtrlClick(event)) {
-      editStyle("emblems");
-      return;
-    }
-    $("#emblems").fadeOut();
-    turnButtonOff("toggleEmblems");
-  }
-}
-
-function drawEmblems() {
-  TIME && console.time("drawEmblems");
-  const {states, provinces, burgs} = pack;
-
-  const validStates = states.filter(s => s.i && !s.removed && s.coa && s.coaSize != 0);
-  const validProvinces = provinces.filter(p => p.i && !p.removed && p.coa && p.coaSize != 0);
-  const validBurgs = burgs.filter(b => b.i && !b.removed && b.coa && b.coaSize != 0);
-
-  const getStateEmblemsSize = () => {
-    const startSize = minmax((graphHeight + graphWidth) / 40, 10, 100);
-    const statesMod = 1 + validStates.length / 100 - (15 - validStates.length) / 200; // states number modifier
-    const sizeMod = +document.getElementById("emblemsStateSizeInput").value || 1;
-    return rn((startSize / statesMod) * sizeMod); // target size ~50px on 1536x754 map with 15 states
-  };
-
-  const getProvinceEmblemsSize = () => {
-    const startSize = minmax((graphHeight + graphWidth) / 100, 5, 70);
-    const provincesMod = 1 + validProvinces.length / 1000 - (115 - validProvinces.length) / 1000; // states number modifier
-    const sizeMod = +document.getElementById("emblemsProvinceSizeInput").value || 1;
-    return rn((startSize / provincesMod) * sizeMod); // target size ~20px on 1536x754 map with 115 provinces
-  };
-
-  const getBurgEmblemSize = () => {
-    const startSize = minmax((graphHeight + graphWidth) / 185, 2, 50);
-    const burgsMod = 1 + validBurgs.length / 1000 - (450 - validBurgs.length) / 1000; // states number modifier
-    const sizeMod = +document.getElementById("emblemsBurgSizeInput").value || 1;
-    return rn((startSize / burgsMod) * sizeMod); // target size ~8.5px on 1536x754 map with 450 burgs
-  };
-
-  const sizeBurgs = getBurgEmblemSize();
-  const burgCOAs = validBurgs.map(burg => {
-    const {x, y} = burg;
-    const size = burg.coaSize || 1;
-    const shift = (sizeBurgs * size) / 2;
-    return {type: "burg", i: burg.i, x, y, size, shift};
-  });
-
-  const sizeProvinces = getProvinceEmblemsSize();
-  const provinceCOAs = validProvinces.map(province => {
-    if (!province.pole) getProvincesVertices();
-    const [x, y] = province.pole || pack.cells.p[province.center];
-    const size = province.coaSize || 1;
-    const shift = (sizeProvinces * size) / 2;
-    return {type: "province", i: province.i, x, y, size, shift};
-  });
-
-  const sizeStates = getStateEmblemsSize();
-  const stateCOAs = validStates.map(state => {
-    const [x, y] = state.pole || pack.cells.p[state.center];
-    const size = state.coaSize || 1;
-    const shift = (sizeStates * size) / 2;
-    return {type: "state", i: state.i, x, y, size, shift};
-  });
-
-  const nodes = burgCOAs.concat(provinceCOAs).concat(stateCOAs);
-  const simulation = d3
-    .forceSimulation(nodes)
-    .alphaMin(0.6)
-    .alphaDecay(0.2)
-    .velocityDecay(0.6)
-    .force(
-      "collision",
-      d3.forceCollide().radius(d => d.shift)
-    )
-    .stop();
-
-  d3.timeout(function () {
-    const n = Math.ceil(Math.log(simulation.alphaMin()) / Math.log(1 - simulation.alphaDecay()));
-    for (let i = 0; i < n; ++i) {
-      simulation.tick();
-    }
-
-    const burgNodes = nodes.filter(node => node.type === "burg");
-    const burgString = burgNodes
-      .map(
-        d =>
-          `<use data-i="${d.i}" x="${rn(d.x - d.shift)}" y="${rn(d.y - d.shift)}" width="${d.size}em" height="${
-            d.size
-          }em"/>`
-      )
-      .join("");
-    emblems.select("#burgEmblems").attr("font-size", sizeBurgs).html(burgString);
-
-    const provinceNodes = nodes.filter(node => node.type === "province");
-    const provinceString = provinceNodes
-      .map(
-        d =>
-          `<use data-i="${d.i}" x="${rn(d.x - d.shift)}" y="${rn(d.y - d.shift)}" width="${d.size}em" height="${
-            d.size
-          }em"/>`
-      )
-      .join("");
-    emblems.select("#provinceEmblems").attr("font-size", sizeProvinces).html(provinceString);
-
-    const stateNodes = nodes.filter(node => node.type === "state");
-    const stateString = stateNodes
-      .map(
-        d =>
-          `<use data-i="${d.i}" x="${rn(d.x - d.shift)}" y="${rn(d.y - d.shift)}" width="${d.size}em" height="${
-            d.size
-          }em"/>`
-      )
-      .join("");
-    emblems.select("#stateEmblems").attr("font-size", sizeStates).html(stateString);
-
-    invokeActiveZooming();
-  });
-
-  TIME && console.timeEnd("drawEmblems");
+  toggleLayer("ZonesLayer");
 }
 
 function layerIsOn(el) {
-  const buttonoff = document.getElementById(el).classList.contains("buttonoff");
-  return !buttonoff;
+  return true;
 }
 
-function turnButtonOff(el) {
-  document.getElementById(el).classList.add("buttonoff");
-  getCurrentPreset();
-}
-
-function turnButtonOn(el) {
-  document.getElementById(el).classList.remove("buttonoff");
-  getCurrentPreset();
+function toggleLayer(layerString) {
+  layerData.get(layerString).isOn = !layerData.get(layerString).isOn;
 }
 
 // move layers on mapLayers dragging (jquery sortable)
@@ -1918,7 +1671,6 @@ function getLayer(id) {
   if (id === "togglePopulation") return $("#population");
   if (id === "toggleIce") return $("#ice");
   if (id === "toggleTexture") return $("#texture");
-  if (id === "toggleEmblems") return $("#emblems");
   if (id === "toggleLabels") return $("#labels");
   if (id === "toggleIcons") return $("#icons");
   if (id === "toggleMarkers") return $("#markers");

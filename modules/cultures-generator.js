@@ -8,7 +8,7 @@ window.Cultures = (function () {
     cells = pack.cells;
 
     const cultureIds = new Uint16Array(cells.i.length); // cell cultures
-    let count = Math.min(+culturesInput.value, +culturesSet.selectedOptions[0].dataset.max);
+    let count = Math.min(+culturesInput.value, +culturesSet.get(cultureSelected));
 
     const populated = cells.i.filter(i => cells.s[i]); // populated cells
     if (populated.length < count * 25) {
@@ -52,7 +52,6 @@ window.Cultures = (function () {
     const cultures = (pack.cultures = selectCultures(count));
     const centers = d3.quadtree();
     const colors = getColors(count);
-    const emblemShape = document.getElementById("emblemShape").value;
 
     const codes = [];
 
@@ -83,7 +82,6 @@ window.Cultures = (function () {
       c.code = abbreviate(c.name, codes);
       codes.push(c.code);
       cultureIds[cell] = newId;
-      if (emblemShape === "random") c.shield = getRandomShield();
     });
 
     cells.culture = cultureIds;
@@ -192,11 +190,6 @@ window.Cultures = (function () {
     const i = pack.cultures.length;
     const color = d3.color(d3.scaleSequential(d3.interpolateRainbow)(Math.random())).hex();
 
-    // define emblem shape
-    let shield = culture.shield;
-    const emblemShape = document.getElementById("emblemShape").value;
-    if (emblemShape === "random") shield = getRandomShield();
-
     pack.cultures.push({
       name,
       color,
@@ -210,8 +203,7 @@ window.Cultures = (function () {
       rural: 0,
       urban: 0,
       origins: [0],
-      code,
-      shield
+      code
     });
   };
 
@@ -232,7 +224,7 @@ window.Cultures = (function () {
     const sf = (cell, fee = 4) =>
       cells.haven[cell] && pack.features[cells.f[cells.haven[cell]]].type !== "lake" ? 1 : fee; // not on sea coast fee
 
-    if (culturesSet.value === "european") {
+    if (cultureSelected === "european") {
       return [
         {name: "Shwazen", base: 0, odd: 1, sort: i => n(i) / td(i, 10) / bd(i, [6, 8]), shield: "swiss"},
         {name: "Angshire", base: 1, odd: 1, sort: i => n(i) / td(i, 10) / sf(i), shield: "wedged"},
@@ -252,7 +244,7 @@ window.Cultures = (function () {
       ];
     }
 
-    if (culturesSet.value === "oriental") {
+    if (cultureSelected === "oriental") {
       return [
         {name: "Koryo", base: 10, odd: 1, sort: i => n(i) / td(i, 12) / t[i], shield: "round"},
         {name: "Hantzu", base: 11, odd: 1, sort: i => n(i) / td(i, 13), shield: "banner"},
@@ -276,7 +268,7 @@ window.Cultures = (function () {
       ];
     }
 
-    if (culturesSet.value === "english") {
+    if (cultureSelected === "english") {
       const getName = () => Names.getBase(1, 5, 9, "", 0);
       return [
         {name: getName(), base: 1, odd: 1, shield: "heater"},
@@ -292,7 +284,7 @@ window.Cultures = (function () {
       ];
     }
 
-    if (culturesSet.value === "antique") {
+    if (cultureSelected === "antique") {
       return [
         {name: "Roman", base: 8, odd: 1, sort: i => n(i) / td(i, 14) / t[i], shield: "roman"}, // Roman
         {name: "Roman", base: 8, odd: 1, sort: i => n(i) / td(i, 15) / sf(i), shield: "roman"}, // Roman
@@ -313,7 +305,7 @@ window.Cultures = (function () {
       ];
     }
 
-    if (culturesSet.value === "highFantasy") {
+    if (cultureSelected === "highFantasy") {
       return [
         // fantasy races
         {
@@ -373,7 +365,7 @@ window.Cultures = (function () {
       ];
     }
 
-    if (culturesSet.value === "darkFantasy") {
+    if (cultureSelected === "darkFantasy") {
       return [
         // common real-world English
         {name: "Angshire", base: 1, odd: 1, sort: i => n(i) / td(i, 10) / sf(i), shield: "heater"},
@@ -446,7 +438,7 @@ window.Cultures = (function () {
       ];
     }
 
-    if (culturesSet.value === "random") {
+    if (cultureSelected === "random") {
       return d3.range(count).map(function () {
         const rnd = rand(nameBases.length - 1);
         const name = Names.getBaseShort(rnd);
@@ -583,10 +575,5 @@ window.Cultures = (function () {
     return 0;
   }
 
-  const getRandomShield = function () {
-    const type = rw(COA.shields.types);
-    return rw(COA.shields[type]);
-  };
-
-  return {generate, add, expand, getDefault, getRandomShield};
+  return {generate, add, expand, getDefault};
 })();

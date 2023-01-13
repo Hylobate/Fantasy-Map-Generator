@@ -97,8 +97,6 @@ window.BurgsAndStates = (function () {
         const name = Names.getState(basename, b.culture);
         const type = cultures[b.culture].type;
 
-        const coa = COA.generate(null, null, null, type);
-        coa.shield = COA.getShield(b.culture, null);
         states.push({
           i,
           color: colors[i - 1],
@@ -107,8 +105,7 @@ window.BurgsAndStates = (function () {
           capital: i,
           type,
           center: b.cell,
-          culture: b.culture,
-          coa
+          culture: b.culture
         });
         cells.burg[b.cell] = i;
       });
@@ -163,7 +160,7 @@ window.BurgsAndStates = (function () {
     }
   };
 
-  // define burg coordinates, coa, port status and define details
+  // define burg coordinates, port status and define details
   const specifyBurgs = function () {
     TIME && console.time("specifyBurgs");
     const cells = pack.cells,
@@ -206,18 +203,6 @@ window.BurgsAndStates = (function () {
         if (cells.r[i] % 2) b.y = rn(b.y + shift, 2);
         else b.y = rn(b.y - shift, 2);
       }
-
-      // define emblem
-      const state = pack.states[b.state];
-      const stateCOA = state.coa;
-      let kinship = 0.25;
-      if (b.capital) kinship += 0.1;
-      else if (b.port) kinship -= 0.1;
-      if (b.culture !== state.culture) kinship -= 0.25;
-      b.type = getType(i, b.port);
-      const type = b.capital && P(0.2) ? "Capital" : b.type === "Generic" ? "City" : b.type;
-      b.coa = COA.generate(stateCOA, kinship, null, type);
-      b.coa.shield = COA.getShield(b.culture, b.state);
     }
 
     // de-assign port status if it's the only one on feature
@@ -599,7 +584,7 @@ window.BurgsAndStates = (function () {
     void (function drawLabels() {
       const g = labels.select("#states");
       const t = defs.select("#textPaths");
-      const displayed = layerIsOn("toggleLabels");
+      const displayed = layerData.get("LabelsLayer").isOn;
       if (!displayed) toggleLabels();
 
       // remove state labels to be redrawn
@@ -1210,13 +1195,9 @@ window.BurgsAndStates = (function () {
         form[formName] += 10;
         const fullName = name + " " + formName;
         const color = getMixedColor(s.color);
-        const kinship = nameByBurg ? 0.8 : 0.4;
-        const type = getType(center, burg.port);
-        const coa = COA.generate(stateBurgs[i].coa, kinship, null, type);
-        coa.shield = COA.getShield(c, s.i);
 
         s.provinces.push(provinceId);
-        provinces.push({i: provinceId, state: s.i, center, burg, name, formName, fullName, color, coa});
+        provinces.push({i: provinceId, state: s.i, center, burg, name, formName, fullName, color});
       }
     });
 
@@ -1348,13 +1329,7 @@ window.BurgsAndStates = (function () {
 
         const fullName = name + " " + formName;
 
-        const dominion = colony ? P(0.95) : singleIsle || isleGroup ? P(0.7) : P(0.3);
-        const kinship = dominion ? 0 : 0.4;
-        const type = getType(center, burgs[burg]?.port);
-        const coa = COA.generate(s.coa, kinship, dominion, type);
-        coa.shield = COA.getShield(c, s.i);
-
-        provinces.push({i: provinceId, state: s.i, center, burg, name, formName, fullName, color, coa});
+        provinces.push({i: provinceId, state: s.i, center, burg, name, formName, fullName, color});
         s.provinces.push(provinceId);
 
         // check if there is a land way within the same state between two cells

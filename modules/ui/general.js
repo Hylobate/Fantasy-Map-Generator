@@ -17,9 +17,6 @@ if (location.hostname && location.hostname !== "localhost" && location.hostname 
 const tooltip = document.getElementById("tooltip");
 
 // show tip for non-svg elemets with data-tip
-document.getElementById("dialogs").addEventListener("mousemove", showDataTip);
-document.getElementById("optionsContainer").addEventListener("mousemove", showDataTip);
-document.getElementById("exitCustomization").addEventListener("mousemove", showDataTip);
 
 const tipBackgroundMap = {
   info: "linear-gradient(0.1turn, #ffffff00, #5e5c5c80, #ffffff00)",
@@ -118,25 +115,6 @@ function showMapTooltip(point, e, i, g) {
   // specific elements
   if (group === "armies") return tip(e.target.parentNode.dataset.name + ". Click to edit");
 
-  if (group === "emblems" && e.target.tagName === "use") {
-    const parent = e.target.parentNode;
-    const [g, type] =
-      parent.id === "burgEmblems"
-        ? [pack.burgs, "burg"]
-        : parent.id === "provinceEmblems"
-        ? [pack.provinces, "province"]
-        : [pack.states, "state"];
-    const i = +e.target.dataset.i;
-    if (event.shiftKey) highlightEmblemElement(type, g[i]);
-
-    d3.select(e.target).raise();
-    d3.select(parent).raise();
-
-    const name = g[i].fullName || g[i].name;
-    tip(`${name} ${type} emblem. Click to edit. Hold Shift to show associated area or place`);
-    return;
-  }
-
   if (group === "rivers") {
     const river = +e.target.id.slice(5);
     const r = pack.rivers.find(r => r.i === river);
@@ -198,20 +176,20 @@ function showMapTooltip(point, e, i, g) {
   if (group === "ice") return tip("Click to edit the Ice");
 
   // covering elements
-  if (layerIsOn("togglePrec") && land) tip("Annual Precipitation: " + getFriendlyPrecipitation(i));
-  else if (layerIsOn("togglePopulation")) tip(getPopulationTip(i));
-  else if (layerIsOn("toggleTemp")) tip("Temperature: " + convertTemperature(grid.cells.temp[g]));
-  else if (layerIsOn("toggleBiomes") && pack.cells.biome[i]) {
+  if (layerData.get("PrecLayer").isOn && land) tip("Annual Precipitation: " + getFriendlyPrecipitation(i));
+  else if (layerData.get("PopulationLayer").isOn) tip(getPopulationTip(i));
+  else if (layerData.get("TempLayer").isOn) tip("Temperature: " + convertTemperature(grid.cells.temp[g]));
+  else if (layerData.get("BiomesLayer").isOn && pack.cells.biome[i]) {
     const biome = pack.cells.biome[i];
     tip("Biome: " + biomesData.name[biome]);
     if (biomesEditor?.offsetParent) highlightEditorLine(biomesEditor, biome);
-  } else if (layerIsOn("toggleReligions") && pack.cells.religion[i]) {
+  } else if (layerData.get("ReligionsLayer").isOn && pack.cells.religion[i]) {
     const religion = pack.cells.religion[i];
     const r = pack.religions[religion];
     const type = r.type === "Cult" || r.type == "Heresy" ? r.type : r.type + " religion";
     tip(type + ": " + r.name);
     if (byId("religionsEditor")?.offsetParent) highlightEditorLine(religionsEditor, religion);
-  } else if (pack.cells.state[i] && (layerIsOn("toggleProvinces") || layerIsOn("toggleStates"))) {
+  } else if (pack.cells.state[i] && (layerData.get("ProvincesLayer").isOn || layerData.get("StatesLayer").isOn)) {
     const state = pack.cells.state[i];
     const stateName = pack.states[state].fullName;
     const province = pack.cells.province[i];
@@ -221,11 +199,11 @@ function showMapTooltip(point, e, i, g) {
     if (document.getElementById("diplomacyEditor")?.offsetParent) highlightEditorLine(diplomacyEditor, state);
     if (document.getElementById("militaryOverview")?.offsetParent) highlightEditorLine(militaryOverview, state);
     if (document.getElementById("provincesEditor")?.offsetParent) highlightEditorLine(provincesEditor, province);
-  } else if (layerIsOn("toggleCultures") && pack.cells.culture[i]) {
+  } else if (layerData.get("CulturesLayer").isOn && pack.cells.culture[i]) {
     const culture = pack.cells.culture[i];
     tip("Culture: " + pack.cultures[culture].name);
     if (document.getElementById("culturesEditor")?.offsetParent) highlightEditorLine(culturesEditor, culture);
-  } else if (layerIsOn("toggleHeight")) tip("Height: " + getFriendlyHeight(point));
+  } else if (layerData.get("HeightLayer").isOn) tip("Height: " + getFriendlyHeight(point));
 }
 
 function highlightEditorLine(editor, id, timeout = 10000) {
@@ -412,47 +390,6 @@ function highlightEmblemElement(type, el) {
     .attr("stroke-dashoffset", d => d[2])
     .attr("opacity", 0)
     .remove();
-}
-
-// assign lock behavior
-document.querySelectorAll("[data-locked]").forEach(function (e) {
-  e.addEventListener("mouseover", function (event) {
-    if (this.className === "icon-lock")
-      tip("Click to unlock the option and allow it to be randomized on new map generation");
-    else tip("Click to lock the option and always use the current value on new map generation");
-    event.stopPropagation();
-  });
-
-  e.addEventListener("click", function () {
-    const id = this.id.slice(5);
-    if (this.className === "icon-lock") unlock(id);
-    else lock(id);
-  });
-});
-
-// lock option
-function lock(id) {
-  const input = document.querySelector('[data-stored="' + id + '"]');
-  if (input) store(id, input.value);
-  const el = document.getElementById("lock_" + id);
-  if (!el) return;
-  el.dataset.locked = 1;
-  el.className = "icon-lock";
-}
-
-// unlock option
-function unlock(id) {
-  localStorage.removeItem(id);
-  const el = document.getElementById("lock_" + id);
-  if (!el) return;
-  el.dataset.locked = 0;
-  el.className = "icon-lock-open";
-}
-
-// check if option is locked
-function locked(id) {
-  const lockEl = document.getElementById("lock_" + id);
-  return lockEl.dataset.locked === "1";
 }
 
 // return key value stored in localStorage or null

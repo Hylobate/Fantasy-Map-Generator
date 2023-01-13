@@ -114,9 +114,6 @@ a {
 #coastline,
 #armies,
 #ice,
-#emblems {
-  cursor: pointer;
-}
 
 #temperature {
   font-family: sans-serif;
@@ -619,10 +616,6 @@ input[type="color"]::-webkit-color-swatch-wrapper {
   border: 0;
 }
 
-#styleSelectFont > option {
-  font-size: 2em;
-}
-
 #sticked {
   display: flex;
   justify-content: space-evenly;
@@ -718,11 +711,6 @@ input[type="color"]::-webkit-color-swatch-wrapper {
   margin: 0;
 }
 
-#mapFilters > button {
-  width: 23%;
-  padding: 4px 0;
-}
-
 #viewMode > button {
   padding: 0.35em;
   margin: 0.2em 0.3em 0.6em 0.3em;
@@ -797,15 +785,6 @@ fieldset {
 #optionsContent table td:nth-of-type(4) {
   text-align: right;
   width: 6%;
-}
-
-.emblemShapePreview {
-  width: 1.5em;
-  height: 1.5em;
-  margin: -0.4em 0.1em;
-  fill: #fff;
-  stroke: #000;
-  stroke-width: 5px;
 }
 
 #styleContent table {
@@ -1680,11 +1659,6 @@ div.states > div.biomeArea {
 
 #emblemBody select {
   width: 9em;
-}
-
-#emblemsBottom {
-  margin-top: 4px;
-  text-align: center;
 }
 
 #emblemUploadControl,

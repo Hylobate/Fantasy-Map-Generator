@@ -148,7 +148,6 @@ function addListeners() {
     const stateId = +$element.parentNode?.dataset?.id;
     if ($element.tagName === "FILL-BOX") stateChangeFill($element);
     else if (classList.contains("name")) editStateName(stateId);
-    else if (classList.contains("coaIcon")) editEmblem("state", "stateCOA" + stateId, pack.states[stateId]);
     else if (classList.contains("icon-star-empty")) stateCapitalZoomIn(stateId);
     else if (classList.contains("statePopulation")) changePopulation(stateId);
     else if (classList.contains("icon-pin")) toggleFog(stateId, classList);
@@ -225,7 +224,6 @@ function statesEditorAddLines() {
         <input data-tip="Neutral lands name. Click to change" class="stateName name pointer italic" value="${
           s.name
         }" readonly />
-        <svg class="coaIcon placeholder hide"></svg>
         <input class="stateForm placeholder" value="none" />
         <span class="icon-star-empty placeholder hide"></span>
         <input class="stateCapital placeholder hide" />
@@ -246,7 +244,6 @@ function statesEditorAddLines() {
     }
 
     const capital = pack.burgs[s.capital].name;
-    COArenderer.trigger("stateCOA" + s.i, s.coa);
     lines += /* html */ `<div
       class="states"
       data-id=${s.i}
@@ -264,9 +261,6 @@ function statesEditorAddLines() {
     >
       <fill-box fill="${s.color}"></fill-box>
       <input data-tip="State name. Click to change" class="stateName name pointer" value="${s.name}" readonly />
-      <svg data-tip="Click to show and edit state emblem" class="coaIcon pointer hide" viewBox="0 0 200 200"><use href="#stateCOA${
-        s.i
-      }"></use></svg>
       <input data-tip="State form name. Click to change" class="stateForm name pointer" value="${
         s.formName
       }" readonly />
@@ -636,11 +630,6 @@ function stateRemove(state) {
     if (s === state) pack.cells.state[i] = 0;
   });
 
-  // remove emblem
-  const coaId = "stateCOA" + state;
-  byId(coaId).remove();
-  emblems.select(`#stateEmblems > use[data-i='${state}']`).remove();
-
   // remove provinces
   pack.states[state].provinces.forEach(p => {
     pack.provinces[p] = {i: p, removed: true};
@@ -648,9 +637,6 @@ function stateRemove(state) {
       if (pr === p) pack.cells.province[i] = 0;
     });
 
-    const coaId = "provinceCOA" + p;
-    if (byId(coaId)) byId(coaId).remove();
-    emblems.select(`#provinceEmblems > use[data-i='${p}']`).remove();
     const g = provs.select("#provincesBody");
     g.select("#province" + p).remove();
     g.select("#province-gap" + p).remove();
@@ -1138,8 +1124,6 @@ function adjustProvinces(affectedProvinces) {
 
     const kinship = nameByBurg ? 0.8 : 0.4;
     const type = BurgsAndStates.getType(center, burg?.port);
-    const coa = COA.generate(burg?.coa || states[stateId].coa, kinship, burg ? null : 0.9, type);
-    coa.shield = COA.getShield(culture, stateId);
 
     provinces.push({
       i: newProvinceId,
@@ -1149,8 +1133,7 @@ function adjustProvinces(affectedProvinces) {
       name,
       formName,
       fullName: `${name} ${formName}`,
-      color,
-      coa
+      color
     });
 
     provinceCells.forEach(i => {
@@ -1237,11 +1220,6 @@ function addState() {
   const color = getRandomColor();
   const pole = cells.p[center];
 
-  // generate emblem
-  const cultureType = pack.cultures[culture].type;
-  const coa = COA.generate(burgs[burg].coa, 0.4, null, cultureType);
-  coa.shield = COA.getShield(culture, null);
-
   // update diplomacy and reverse relations
   const diplomacy = states.map(s => {
     if (!s.i || s.removed) return "x";
@@ -1285,7 +1263,6 @@ function addState() {
     culture,
     military: [],
     alert: 1,
-    coa,
     pole
   });
   BurgsAndStates.collectStatistics();
@@ -1316,7 +1293,6 @@ function addState() {
     .attr("x", name.length * -3)
     .text(name);
 
-  COArenderer.add("state", newState, coa, states[newState].pole[0], states[newState].pole[1]);
   statesEditorAddLines();
 }
 

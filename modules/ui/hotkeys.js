@@ -27,7 +27,6 @@ function handleKeyup(event) {
   else if (code === "F2") regeneratePrompt();
   else if (code === "F6") quickSave();
   else if (code === "F9") quickLoad();
-  else if (code === "Tab") toggleOptions(event);
   else if (code === "Escape") closeAllDialogs();
   else if (code === "Delete") removeElementOnKey();
   else if (code === "KeyO" && document.getElementById("canvas3d")) toggle3dOptions();
@@ -84,7 +83,6 @@ function handleKeyup(event) {
   else if (code === "KeyN") togglePopulation();
   else if (code === "KeyJ") toggleIce();
   else if (code === "KeyA") togglePrec();
-  else if (code === "KeyY") toggleEmblems();
   else if (code === "KeyL") toggleLabels();
   else if (code === "KeyI") toggleIcons();
   else if (code === "KeyM") toggleMilitary();

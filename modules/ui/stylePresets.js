@@ -3,6 +3,7 @@
 
 const systemPresets = ["default", "ancient", "gloom", "light", "watercolor", "clean", "atlas", "cyberpunk", "monochrome"];
 const customPresetPrefix = "fmgStyle_";
+const stylePreset = { value: "default" };
 
 // add style presets to list
 {
@@ -10,17 +11,15 @@ const customPresetPrefix = "fmgStyle_";
   const storedStyles = Object.keys(localStorage).filter(key => key.startsWith(customPresetPrefix));
   const customOptions = storedStyles.map(styleName => `<option value="${styleName}">${styleName.replace(customPresetPrefix, "")} [custom]</option>`);
   const options = systemOptions.join("") + customOptions.join("");
-  document.getElementById("stylePreset").innerHTML = options;
 }
 
 async function applyStyleOnLoad() {
-  const desiredPreset = localStorage.getItem("presetStyle") || "default";
+  const desiredPreset = styleGroupSelect.value;
   const styleData = await getStylePreset(desiredPreset);
   const [appliedPreset, style] = styleData;
 
   applyStyle(style);
-  updateMapFilter();
-  stylePreset.value = stylePreset.dataset.old = appliedPreset;
+
   setPresetRemoveButtonVisibiliy();
 }
 
@@ -176,7 +175,6 @@ function addStylePreset() {
       "#provs": ["opacity", "fill", "font-size", "font-family", "filter"],
       "#temperature": ["opacity", "font-size", "fill", "fill-opacity", "stroke", "stroke-width", "stroke-dasharray", "stroke-linecap", "filter"],
       "#ice": ["opacity", "fill", "stroke", "stroke-width", "filter"],
-      "#emblems": ["opacity", "stroke-width", "filter"],
       "#texture": ["opacity", "filter", "mask"],
       "#textureImage": ["x", "y"],
       "#zones": ["opacity", "stroke", "stroke-width", "stroke-dasharray", "stroke-linecap", "filter", "mask"],
@@ -307,5 +305,4 @@ function updateMapFilter() {
 
 function setPresetRemoveButtonVisibiliy() {
   const isDefault = systemPresets.includes(stylePreset.value);
-  removeStyleButton.style.display = isDefault ? "none" : "inline-block";
 }

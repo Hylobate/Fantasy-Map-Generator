@@ -307,9 +307,6 @@ window.Submap = (function () {
       }
     }
     if (layerIsOn("toggleMarkers")) drawMarkers();
-
-    stage("Redraw emblems.");
-    drawEmblems();
     stage("Regenerating Zones.");
     addZones();
     Names.getMapName();

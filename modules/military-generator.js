@@ -219,7 +219,6 @@ window.Military = (function () {
       // generate name for regiments
       regiments.forEach(r => {
         r.name = getName(r, regiments);
-        r.icon = getEmblem(r);
         generateNote(r, s);
       });
 
@@ -376,15 +375,6 @@ window.Military = (function () {
     return `${number}${proper ? ` (${proper}) ` : ` `}${form}`;
   };
 
-  // get default regiment emblem
-  const getEmblem = function (r) {
-    if (!r.n && !Object.values(r.u).length) return "🔰"; // "Newbie" regiment without troops
-    if (!r.n && pack.states[r.state].form === "Monarchy" && pack.cells.burg[r.cell] && pack.burgs[pack.cells.burg[r.cell]].capital) return "👑"; // "Royal" regiment based in capital
-    const mainUnit = Object.entries(r.u).sort((a, b) => b[1] - a[1])[0][0]; // unit with more troops in regiment
-    const unit = options.military.find(u => u.name === mainUnit);
-    return unit.icon;
-  };
-
   const generateNote = function (r, s) {
     const cells = pack.cells;
     const base =
@@ -409,5 +399,5 @@ window.Military = (function () {
     notes.push({id: `regiment${s.i}-${r.i}`, name: `${r.icon} ${r.name}`, legend});
   };
 
-  return {generate, redraw, getDefaultOptions, getName, generateNote, drawRegiments, drawRegiment, moveRegiment, getTotal, getEmblem};
+  return {generate, redraw, getDefaultOptions, getName, generateNote, drawRegiments, drawRegiment, moveRegiment, getTotal};
 })();

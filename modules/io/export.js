@@ -203,21 +203,6 @@ async function getMapURL(type, options = {}) {
     symbols[i].remove();
   }
 
-  // add displayed emblems
-  if (layerIsOn("toggleEmblems") && emblems.selectAll("use").size()) {
-    cloneEl
-      .getElementById("emblems")
-      ?.querySelectorAll("use")
-      .forEach(el => {
-        const href = el.getAttribute("href") || el.getAttribute("xlink:href");
-        if (!href) return;
-        const emblem = document.getElementById(href.slice(1));
-        if (emblem) cloneDefs.append(emblem.cloneNode(true));
-      });
-  } else {
-    cloneDefs.querySelector("#defs-emblems")?.remove();
-  }
-
   // replace ocean pattern href to base64
   if (location.hostname && cloneEl.getElementById("oceanicPattern")) {
     const el = cloneEl.getElementById("oceanicPattern");

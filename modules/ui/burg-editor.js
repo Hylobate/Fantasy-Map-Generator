@@ -106,10 +106,6 @@ function editBurg(id) {
       select.options.add(new Option(this.id, this.id, false, this.id === group));
     });
 
-    // set emlem image
-    const coaID = "burgCOA" + id;
-    COArenderer.trigger(coaID, b.coa);
-    document.getElementById("burgEmblem").setAttribute("href", "#" + coaID);
 
     if (options.showMFCGMap) {
       document.getElementById("mfcgPreviewSection").style.display = "block";
@@ -439,12 +435,6 @@ function editBurg(id) {
       else delete burg.link;
       updateMFCGFrame(burg);
     });
-  }
-
-  function openEmblemEdit() {
-    const id = +elSelected.attr("data-id"),
-      burg = pack.burgs[id];
-    editEmblem("burg", "burgCOA" + id, burg);
   }
 
   function toggleMFCGMap() {

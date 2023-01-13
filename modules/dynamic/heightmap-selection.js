@@ -8,8 +8,7 @@ addListeners();
 export function open() {
   closeDialogs(".stable");
 
-  const $templateInput = byId("templateInput");
-  setSelected($templateInput.value);
+  setSelected(templateInput);
   graph = getGraph(graph);
 
   $("#heightmapSelection").dialog({

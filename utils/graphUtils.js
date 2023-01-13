@@ -5,7 +5,7 @@
 function shouldRegenerateGrid(grid, expectedSeed) {
   if (expectedSeed && expectedSeed !== grid.seed) return true;
 
-  const cellsDesired = +byId("pointsInput").dataset.cells;
+  const cellsDesired = pointsInput.dataset.cells;
   if (cellsDesired !== grid.cellsDesired) return true;
 
   const newSpacing = rn(Math.sqrt((graphWidth * graphHeight) / cellsDesired), 2);
@@ -25,7 +25,7 @@ function generateGrid() {
 // place random points to calculate Voronoi diagram
 function placePoints() {
   TIME && console.time("placePoints");
-  const cellsDesired = +byId("pointsInput").dataset.cells;
+  const cellsDesired = pointsInput.dataset.cells;
   const spacing = rn(Math.sqrt((graphWidth * graphHeight) / cellsDesired), 2); // spacing between points before jirrering
 
   const boundary = getBoundaryPoints(graphWidth, graphHeight, spacing);

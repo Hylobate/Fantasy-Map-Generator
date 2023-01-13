@@ -116,7 +116,6 @@ function uploadMap(file, callback) {
   const fileReader = new FileReader();
   fileReader.onload = function (fileLoadedEvent) {
     if (callback) callback();
-    document.getElementById("coas").innerHTML = ""; // remove auto-generated emblems
     const result = fileLoadedEvent.target.result;
     const [mapData, mapVersion] = parseLoadedResult(result);
 
@@ -311,7 +310,6 @@ async function parseLoadedData(data) {
       coastline = viewbox.select("#coastline");
       prec = viewbox.select("#prec");
       population = viewbox.select("#population");
-      emblems = viewbox.select("#emblems");
       labels = viewbox.select("#labels");
       icons = viewbox.select("#icons");
       burgIcons = icons.select("#burgIcons");
@@ -374,51 +372,6 @@ async function parseLoadedData(data) {
           nameBases[i] = {name: e[0], min: e[1], max: e[2], d: e[3], m: e[4], b};
         });
       }
-    })();
-
-    void (function restoreLayersState() {
-      // helper functions
-      const notHidden = selection => selection.node() && selection.style("display") !== "none";
-      const hasChildren = selection => selection.node()?.hasChildNodes();
-      const hasChild = (selection, selector) => selection.node()?.querySelector(selector);
-      const turnOn = el => document.getElementById(el).classList.remove("buttonoff");
-
-      // turn all layers off
-      document
-        .getElementById("mapLayers")
-        .querySelectorAll("li")
-        .forEach(el => el.classList.add("buttonoff"));
-
-      // turn on active layers
-      if (notHidden(texture) && hasChild(texture, "image")) turnOn("toggleTexture");
-      if (hasChildren(terrs)) turnOn("toggleHeight");
-      if (hasChildren(biomes)) turnOn("toggleBiomes");
-      if (hasChildren(cells)) turnOn("toggleCells");
-      if (hasChildren(gridOverlay)) turnOn("toggleGrid");
-      if (hasChildren(coordinates)) turnOn("toggleCoordinates");
-      if (notHidden(compass) && hasChild(compass, "use")) turnOn("toggleCompass");
-      if (hasChildren(rivers)) turnOn("toggleRivers");
-      if (notHidden(terrain) && hasChildren(terrain)) turnOn("toggleRelief");
-      if (hasChildren(relig)) turnOn("toggleReligions");
-      if (hasChildren(cults)) turnOn("toggleCultures");
-      if (hasChildren(statesBody)) turnOn("toggleStates");
-      if (hasChildren(provs)) turnOn("toggleProvinces");
-      if (hasChildren(zones) && notHidden(zones)) turnOn("toggleZones");
-      if (notHidden(borders) && hasChild(compass, "use")) turnOn("toggleBorders");
-      if (notHidden(routes) && hasChild(routes, "path")) turnOn("toggleRoutes");
-      if (hasChildren(temperature)) turnOn("toggleTemp");
-      if (hasChild(population, "line")) turnOn("togglePopulation");
-      if (hasChildren(ice)) turnOn("toggleIce");
-      if (hasChild(prec, "circle")) turnOn("togglePrec");
-      if (notHidden(emblems) && hasChild(emblems, "use")) turnOn("toggleEmblems");
-      if (notHidden(labels)) turnOn("toggleLabels");
-      if (notHidden(icons)) turnOn("toggleIcons");
-      if (hasChildren(armies) && notHidden(armies)) turnOn("toggleMilitary");
-      if (hasChildren(markers)) turnOn("toggleMarkers");
-      if (notHidden(ruler)) turnOn("toggleRulers");
-      if (notHidden(scaleBar)) turnOn("toggleScaleBar");
-
-      getCurrentPreset();
     })();
 
     void (function restoreEvents() {
@@ -581,16 +534,14 @@ async function parseLoadedData(data) {
 
     changeMapSize();
 
-    // remove href from emblems, to trigger rendering on load
-    emblems.selectAll("use").attr("href", null);
-
     // draw data layers (no kept in svg)
-    if (rulers && layerIsOn("toggleRulers")) rulers.draw();
-    if (layerIsOn("toggleGrid")) drawGrid();
+    if (rulers && layerData.get("RulersLayer").isOn) rulers.draw();
+    if (layerData.get("GridLayer").isOn) drawGrid();
 
     // set options
     yearInput.value = options.year;
     eraInput.value = options.era;
+    let shapeRendering = {value: "optimizeSpeed"};
     shapeRendering.value = viewbox.attr("shape-rendering") || "geometricPrecision";
 
     if (window.restoreDefaultEvents) restoreDefaultEvents();

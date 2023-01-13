@@ -66,7 +66,7 @@ export function resolveVersionConflicts(version) {
     addZones();
     if (!markers.selectAll("*").size()) {
       Markers.generate();
-      turnButtonOn("toggleMarkers");
+      toggleLayer("MarkerLayer");
     }
 
     // v1.0 add fogging layer (state focus)
@@ -279,7 +279,7 @@ export function resolveVersionConflicts(version) {
       .attr("box-size", 3)
       .attr("stroke", "#000")
       .attr("stroke-width", 0.3);
-    turnButtonOn("toggleMilitary");
+      toggleLayer("MilitaryLayer")
     Military.generate();
   }
 
@@ -334,26 +334,11 @@ export function resolveVersionConflicts(version) {
     localStorage.removeItem("styleAncient");
     localStorage.removeItem("styleMonochrome");
 
-    // v1.5 cultures has shield attribute
-    pack.cultures.forEach(culture => {
-      if (culture.removed) return;
-      culture.shield = Cultures.getRandomShield();
-    });
-
     // v1.5 added burg type value
     pack.burgs.forEach(burg => {
       if (!burg.i || burg.removed) return;
       burg.type = BurgsAndStates.getType(burg.cell, burg.port);
     });
-
-    // v1.5 added emblems
-    defs.append("g").attr("id", "defs-emblems");
-    emblems = viewbox.insert("g", "#population").attr("id", "emblems").style("display", "none");
-    emblems.append("g").attr("id", "burgEmblems");
-    emblems.append("g").attr("id", "provinceEmblems");
-    emblems.append("g").attr("id", "stateEmblems");
-    regenerateEmblems();
-    toggleEmblems();
 
     // v1.5 changed releif icons data
     terrain.selectAll("use").each(function () {
@@ -440,9 +425,8 @@ export function resolveVersionConflicts(version) {
     ruler.selectAll("*").remove();
 
     if (rulers.data.length) {
-      turnButtonOn("toggleRulers");
       rulers.draw();
-    } else turnButtonOff("toggleRulers");
+    }
 
     // 1.61 changed oceanicPattern from rect to image
     const pattern = document.getElementById("oceanic");
@@ -628,12 +612,5 @@ export function resolveVersionConflicts(version) {
       religion.origins = [religion.origin];
       delete religion.origin;
     }
-  }
-
-  if (version < 1.88) {
-    // v1.87 may have incorrect shield for some reason
-    pack.states.forEach(({coa}) => {
-      if (coa?.shield === "state") delete coa.shield;
-    });
   }
 }

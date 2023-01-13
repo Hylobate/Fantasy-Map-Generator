@@ -253,11 +253,6 @@
     "stroke-width": 0,
     "filter": "url(#dropShadow05)"
   },
-  "#emblems": {
-    "opacity": 0.75,
-    "stroke-width": 0.5,
-    "filter": ""
-  },
   "#texture": {
     "opacity": 0.14,
     "filter": null,

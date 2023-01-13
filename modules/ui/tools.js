@@ -2,93 +2,21 @@
 
 // module to control the Tools options (click to edit, to re-geenerate, tp add)
 
-toolsContent.addEventListener("click", function (event) {
-  if (customization) return tip("Please exit the customization mode first", false, "warning");
-  if (!["BUTTON", "I"].includes(event.target.tagName)) return;
-  const button = event.target.id;
-
-  // click on open Editor buttons
-  if (button === "editHeightmapButton") editHeightmap();
-  else if (button === "editBiomesButton") editBiomes();
-  else if (button === "editStatesButton") editStates();
-  else if (button === "editProvincesButton") editProvinces();
-  else if (button === "editDiplomacyButton") editDiplomacy();
-  else if (button === "editCulturesButton") editCultures();
-  else if (button === "editReligions") editReligions();
-  else if (button === "editEmblemButton") openEmblemEditor();
-  else if (button === "editNamesBaseButton") editNamesbase();
-  else if (button === "editUnitsButton") editUnits();
-  else if (button === "editNotesButton") editNotes();
-  else if (button === "editZonesButton") editZones();
-  else if (button === "overviewChartsButton") overviewCharts();
-  else if (button === "overviewBurgsButton") overviewBurgs();
-  else if (button === "overviewRiversButton") overviewRivers();
-  else if (button === "overviewMilitaryButton") overviewMilitary();
-  else if (button === "overviewMarkersButton") overviewMarkers();
-  else if (button === "overviewCellsButton") viewCellDetails();
-
-  // click on Regenerate buttons
-  if (event.target.parentNode.id === "regenerateFeature") {
-    const dontAsk = sessionStorage.getItem("regenerateFeatureDontAsk");
-    if (dontAsk) return processFeatureRegeneration(event, button);
-
-    alertMessage.innerHTML = /* html */ `Regeneration will remove all the custom changes for the element.<br /><br />Are you sure you want to proceed?`;
-    $("#alert").dialog({
-      resizable: false,
-      title: "Regenerate element",
-      buttons: {
-        Proceed: function () {
-          processFeatureRegeneration(event, button);
-          $(this).dialog("close");
-        },
-        Cancel: function () {
-          $(this).dialog("close");
-        }
-      },
-      open: function () {
-        const checkbox =
-          '<span><input id="dontAsk" class="checkbox" type="checkbox"><label for="dontAsk" class="checkbox-label dontAsk"><i>do not ask again</i></label><span>';
-        const pane = this.parentElement.querySelector(".ui-dialog-buttonpane");
-        pane.insertAdjacentHTML("afterbegin", checkbox);
-      },
-      close: function () {
-        const box = this.parentElement.querySelector(".checkbox");
-        if (box?.checked) sessionStorage.setItem("regenerateFeatureDontAsk", true);
-        $(this).dialog("destroy");
-      }
-    });
-  }
-
-  // click on Configure regenerate buttons
-  if (button === "configRegenerateMarkers") configMarkersGeneration();
-
-  // click on Add buttons
-  if (button === "addLabel") toggleAddLabel();
-  else if (button === "addBurgTool") toggleAddBurg();
-  else if (button === "addRiver") toggleAddRiver();
-  else if (button === "addRoute") toggleAddRoute();
-  else if (button === "addMarker") toggleAddMarker();
-  // click to create a new map buttons
-  else if (button === "openSubmapMenu") UISubmap.openSubmapMenu();
-  else if (button === "openResampleMenu") UISubmap.openResampleMenu();
-});
-
 function processFeatureRegeneration(event, button) {
   if (button === "regenerateStateLabels") {
     BurgsAndStates.drawStateLabels();
-    if (!layerIsOn("toggleLabels")) toggleLabels();
+    if (!layerData.get("LabelsLayer").isOn) toggleLabels();
   } else if (button === "regenerateReliefIcons") {
     ReliefIcons();
-    if (!layerIsOn("toggleRelief")) toggleRelief();
+    if (!layerData.get("ReliefLayer").isOn) toggleRelief();
   } else if (button === "regenerateRoutes") {
     Routes.regenerate();
-    if (!layerIsOn("toggleRoutes")) toggleRoutes();
+    if (!layerData.get("RoutesLayer").isOn) toggleRoutes();
   } else if (button === "regenerateRivers") regenerateRivers();
   else if (button === "regeneratePopulation") recalculatePopulation();
   else if (button === "regenerateStates") regenerateStates();
   else if (button === "regenerateProvinces") regenerateProvinces();
   else if (button === "regenerateBurgs") regenerateBurgs();
-  else if (button === "regenerateEmblems") regenerateEmblems();
   else if (button === "regenerateReligions") regenerateReligions();
   else if (button === "regenerateCultures") regenerateCultures();
   else if (button === "regenerateMilitary") regenerateMilitary();
@@ -97,31 +25,11 @@ function processFeatureRegeneration(event, button) {
   else if (button === "regenerateZones") regenerateZones(event);
 }
 
-async function openEmblemEditor() {
-  let type, id, el;
-
-  if (pack.states[1]?.coa) {
-    type = "state";
-    id = "stateCOA1";
-    el = pack.states[1];
-  } else if (pack.burgs[1]?.coa) {
-    type = "burg";
-    id = "burgCOA1";
-    el = pack.burgs[1];
-  } else {
-    tip("No emblems to edit, please generate states and burgs first", false, "error");
-    return;
-  }
-
-  await COArenderer.trigger(id, el.coa);
-  editEmblem(type, id, el);
-}
-
 function regenerateRivers() {
   Rivers.generate();
   Lakes.defineGroup();
   Rivers.specify();
-  if (!layerIsOn("toggleRivers")) toggleRivers();
+  if (!layerData.get("RiversLayer").isOn) toggleRivers();
   else drawRivers();
 }
 
@@ -149,13 +57,12 @@ function regenerateStates() {
   BurgsAndStates.defineStateForms();
   BurgsAndStates.generateProvinces(true);
 
-  layerIsOn("toggleStates") ? drawStates() : toggleStates();
-  layerIsOn("toggleBorders") ? drawBorders() : toggleBorders();
-  if (layerIsOn("toggleProvinces")) drawProvinces();
+  layerData.get("StatesLayer").isOn ? drawStates() : toggleStates();
+  layerData.get("BordersLayer").isOn ? drawBorders() : toggleBorders();
+  if (layerData.get("ProvincesLayer").isOn) drawProvinces();
 
   BurgsAndStates.drawStateLabels();
   Military.generate();
-  if (layerIsOn("toggleEmblems")) drawEmblems();
 
   if (document.getElementById("burgsOverviewRefresh")?.offsetParent) burgsOverviewRefresh.click();
   if (document.getElementById("statesEditorRefresh")?.offsetParent) statesEditorRefresh.click();
@@ -191,24 +98,13 @@ function recreateStates() {
     burg.capital = 0;
   }
 
-  // remove labels and emblems for non-locked states
+  // remove labels for non-locked states
   for (const state of pack.states) {
     if (!state.i || state.removed || state.lock) continue;
 
     // remove state labels
     byId(`stateLabel${state.i}`)?.remove();
     byId(`textPath_stateLabel${state.i}`)?.remove();
-
-    // remove state emblems
-    byId(`stateCOA${state.i}`)?.remove();
-    document.querySelector(`#stateEmblems > use[data-i="${state.i}"]`)?.remove();
-
-    // remove province data and emblems
-    for (const provinceId of state.provinces) {
-      byId(`provinceCOA${provinceId}`)?.remove();
-      document.querySelector(`#provinceEmblems > use[data-i="${provinceId}"]`)?.remove();
-      pack.provinces[provinceId].removed = true;
-    }
   }
 
   unfog();
@@ -242,10 +138,6 @@ function recreateStates() {
       .select("textPath")
       .attr("xlink:href", `#textPath_stateLabel${newId}`);
     defs.select("#textPaths").select(`#textPath_stateLabel${state.i}`).attr("id", `textPath_stateLabel${newId}`);
-
-    // update emblem id reference
-    byId(`stateCOA${state.i}`)?.setAttribute("id", `stateCOA${newId}`);
-    document.querySelector(`#stateEmblems > use[data-i="${state.i}"]`)?.setAttribute("data-i", newId);
 
     state.provinces.forEach(provinceId => {
       if (!pack.provinces[provinceId]) return;
@@ -296,10 +188,8 @@ function recreateStates() {
     const expansionism = rn(Math.random() * powerInput.value + 1, 1);
 
     const cultureType = pack.cultures[culture].type;
-    const coa = COA.generate(capital.coa, 0.3, null, cultureType);
-    coa.shield = capital.coa.shield;
 
-    newStates.push({i, name, type, capital: capital.i, center: capital.cell, culture, expansionism, coa});
+    newStates.push({i, name, type, capital: capital.i, center: capital.cell, culture, expansionism});
   }
 
   if (!statesCount) tip(`<i>States Number</i> option is set to zero. No counties are generated`, false, "warn");
@@ -312,12 +202,8 @@ function regenerateProvinces() {
 
   BurgsAndStates.generateProvinces(true, true);
   drawBorders();
-  if (layerIsOn("toggleProvinces")) drawProvinces();
+  if (layerData.get("ProvincesLayer").isOn) drawProvinces();
 
-  // remove emblems
-  document.querySelectorAll("[id^=provinceCOA]").forEach(el => el.remove());
-  emblems.selectAll("use").remove();
-  if (layerIsOn("toggleEmblems")) drawEmblems();
   refreshAllEditors();
 }
 
@@ -400,70 +286,13 @@ function regenerateBurgs() {
   BurgsAndStates.drawBurgs();
   Routes.regenerate();
 
-  // remove emblems
-  document.querySelectorAll("[id^=burgCOA]").forEach(el => el.remove());
-  emblems.selectAll("use").remove();
-  if (layerIsOn("toggleEmblems")) drawEmblems();
-
   if (document.getElementById("burgsOverviewRefresh")?.offsetParent) burgsOverviewRefresh.click();
   if (document.getElementById("statesEditorRefresh")?.offsetParent) statesEditorRefresh.click();
 }
 
-function regenerateEmblems() {
-  // remove old emblems
-  document.querySelectorAll("[id^=stateCOA]").forEach(el => el.remove());
-  document.querySelectorAll("[id^=provinceCOA]").forEach(el => el.remove());
-  document.querySelectorAll("[id^=burgCOA]").forEach(el => el.remove());
-  emblems.selectAll("use").remove();
-
-  // generate new emblems
-  pack.states.forEach(state => {
-    if (!state.i || state.removed) return;
-    const cultureType = pack.cultures[state.culture].type;
-    state.coa = COA.generate(null, null, null, cultureType);
-    state.coa.shield = COA.getShield(state.culture, null);
-  });
-
-  pack.burgs.forEach(burg => {
-    if (!burg.i || burg.removed) return;
-    const state = pack.states[burg.state];
-
-    let kinship = state ? 0.25 : 0;
-    if (burg.capital) kinship += 0.1;
-    else if (burg.port) kinship -= 0.1;
-    if (state && burg.culture !== state.culture) kinship -= 0.25;
-    burg.coa = COA.generate(state ? state.coa : null, kinship, null, burg.type);
-    burg.coa.shield = COA.getShield(burg.culture, state ? burg.state : 0);
-  });
-
-  pack.provinces.forEach(province => {
-    if (!province.i || province.removed) return;
-    const parent = province.burg ? pack.burgs[province.burg] : pack.states[province.state];
-
-    let dominion = false;
-    if (!province.burg) {
-      dominion = P(0.2);
-      if (province.formName === "Colony") dominion = P(0.95);
-      else if (province.formName === "Island") dominion = P(0.6);
-      else if (province.formName === "Islands") dominion = P(0.5);
-      else if (province.formName === "Territory") dominion = P(0.4);
-      else if (province.formName === "Land") dominion = P(0.3);
-    }
-
-    const nameByBurg = province.burg && province.name.slice(0, 3) === parent.name.slice(0, 3);
-    const kinship = dominion ? 0 : nameByBurg ? 0.8 : 0.4;
-    const culture = pack.cells.culture[province.center];
-    const type = BurgsAndStates.getType(province.center, parent.port);
-    province.coa = COA.generate(parent.coa, kinship, dominion, type);
-    province.coa.shield = COA.getShield(culture, province.state);
-  });
-
-  if (layerIsOn("toggleEmblems")) drawEmblems(); // redrawEmblems
-}
-
 function regenerateReligions() {
   Religions.generate();
-  if (!layerIsOn("toggleReligions")) toggleReligions();
+  if (!layerData.get("ReligionsLayer").isOn) toggleReligions();
   else drawReligions();
   refreshAllEditors();
 }
@@ -473,26 +302,25 @@ function regenerateCultures() {
   Cultures.expand();
   BurgsAndStates.updateCultures();
   Religions.updateCultures();
-  if (!layerIsOn("toggleCultures")) toggleCultures();
+  if (!layerData.get("CulturesLayer").isOn) toggleCultures();
   else drawCultures();
   refreshAllEditors();
 }
 
 function regenerateMilitary() {
   Military.generate();
-  if (!layerIsOn("toggleMilitary")) toggleMilitary();
+  if (!layerData.get("MilitaryLayer").isOn) toggleMilitary();
   if (document.getElementById("militaryOverviewRefresh").offsetParent) militaryOverviewRefresh.click();
 }
 
 function regenerateIce() {
-  if (!layerIsOn("toggleIce")) toggleIce();
+  if (!layerData.get("IceLayer").isOn) toggleIce();
   ice.selectAll("*").remove();
   drawIce();
 }
 
 function regenerateMarkers() {
   Markers.regenerate();
-  turnButtonOn("toggleMarkers");
   drawMarkers();
   if (document.getElementById("markersOverviewRefresh").offsetParent) markersOverviewRefresh.click();
 }
@@ -508,7 +336,7 @@ function regenerateZones(event) {
     zones.selectAll("g").remove(); // remove existing zones
     addZones(number);
     if (document.getElementById("zonesEditorRefresh").offsetParent) zonesEditorRefresh.click();
-    if (!layerIsOn("toggleZones")) toggleZones();
+    if (!layerData.get("ZonesLayer").isOn) toggleZones();
   }
 }
 
@@ -530,7 +358,7 @@ function toggleAddLabel() {
   closeDialogs(".stable");
   viewbox.style("cursor", "crosshair").on("click", addLabelOnClick);
   tip("Click on map to place label. Hold Shift to add multiple", true);
-  if (!layerIsOn("toggleLabels")) toggleLabels();
+  if (!layerData.get("LabelsLayer").isOn) toggleLabels();
 }
 
 function addLabelOnClick() {
@@ -607,7 +435,7 @@ function toggleAddRiver() {
   closeDialogs(".stable");
   viewbox.style("cursor", "crosshair").on("click", addRiverOnClick);
   tip("Click on map to place new river or extend an existing one. Hold Shift to place multiple rivers", true, "warn");
-  if (!layerIsOn("toggleRivers")) toggleRivers();
+  if (!layerData.get("RiversLayer").isOn) toggleRivers();
 }
 
 function addRiverOnClick() {
@@ -773,7 +601,7 @@ function toggleAddRoute() {
   closeDialogs(".stable");
   viewbox.style("cursor", "crosshair").on("click", addRouteOnClick);
   tip("Click on map to add a first control point", true);
-  if (!layerIsOn("toggleRoutes")) toggleRoutes();
+  if (!layerData.get("RoutesLayer").isOn) toggleRoutes();
 }
 
 function addRouteOnClick() {
@@ -802,7 +630,7 @@ function toggleAddMarker() {
 
   viewbox.style("cursor", "crosshair").on("click", addMarkerOnClick);
   tip("Click on map to add a marker. Hold Shift to add multiple", true);
-  if (!layerIsOn("toggleMarkers")) toggleMarkers();
+  if (!layerData.get("MarkersLayer").isOn) toggleMarkers();
 }
 
 function addMarkerOnClick() {

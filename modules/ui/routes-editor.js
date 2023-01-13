@@ -3,7 +3,7 @@ function editRoute(onClick) {
   if (customization) return;
   if (!onClick && elSelected && d3.event.target.id === elSelected.attr("id")) return;
   closeDialogs(".stable");
-  if (!layerIsOn("toggleRoutes")) toggleRoutes();
+  if (!layerData.get("RoutesLayer").isOn) toggleRoutes();
 
   $("#routeEditor").dialog({
     title: "Edit Route",

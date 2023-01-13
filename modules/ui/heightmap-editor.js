@@ -107,7 +107,7 @@ function editHeightmap(options) {
         .style("transform", "scale(1)");
     } else exitCustomization.style.display = "block";
 
-    turnButtonOn("toggleHeight");
+    layerData.get("HeightLayer").isOn = true;
     layersPreset.value = "heightmap";
     layersPreset.disabled = true;
     mockHeightmap();
@@ -188,7 +188,7 @@ function editHeightmap(options) {
 
     // restore initial layers
     byId("heights").remove();
-    turnButtonOff("toggleHeight");
+    layerdata.get("HeightLayer").isOn = false;
     document
       .getElementById("mapLayers")
       .querySelectorAll("li")
@@ -972,7 +972,7 @@ function editHeightmap(options) {
             </select>
           </span>
           <span>v:
-            <input class="templateCount" data-tip="Multiply all cells Height by the value" type="number" 
+            <input class="templateCount" data-tip="Multiply all cells Height by the value" type="number"
               value=${count || 1.1} min=0 max=10 step=.1 />
           </span>
         </div>`;
@@ -980,7 +980,7 @@ function editHeightmap(options) {
       if (type === "Smooth")
         return /* html */ `${common}
           <span>f:
-            <input class="templateCount" data-tip="Set smooth fraction. 1 - full smooth, 2 - half-smooth, etc." 
+            <input class="templateCount" data-tip="Set smooth fraction. 1 - full smooth, 2 - half-smooth, etc."
               type="number" min=1 max=10 step=1 value=${count || 2} />
           </span>
         </div>`;
@@ -1042,7 +1042,7 @@ function editHeightmap(options) {
       if (!steps.length) return;
 
       const currentSeed = byId("templateSeed").value;
-      const seed = (locked("templateSeed") && currentSeed) || generateSeed();
+      const seed = (currentSeed) || generateSeed();
       Math.random = aleaPRNG(seed);
       byId("templateSeed").value = seed;
 

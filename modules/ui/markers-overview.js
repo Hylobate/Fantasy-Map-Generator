@@ -2,7 +2,7 @@
 function overviewMarkers() {
   if (customization) return;
   closeDialogs("#markersOverview, .stable");
-  if (!layerIsOn("toggleMarkers")) toggleMarkers();
+  if (!layerData.get("MarkersLayer").isOn) toggleMarkers();
 
   const markerGroup = document.getElementById("markers");
   const body = document.getElementById("markersBody");
